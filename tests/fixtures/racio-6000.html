@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+	<link rel="preload" href="/assets/application-15413068.css" as="style" type="text/css">
+	<link rel="preload" href="/assets/application-8bf92530.js" as="script" type="text/javascript">
+	<link rel="preload" href="/assets/merriweather_400i-b13f27b4.woff" as="font" type="font/woff" crossorigin="anonymous">
+	<link rel="preload" href="/assets/merriweather_700-8d7a38f7.woff" as="font" type="font/woff" crossorigin="anonymous">
+	<link rel="preload" href="/assets/montserrat_300-67243b54.woff" as="font" type="font/woff" crossorigin="anonymous">
+	<link rel="preload" href="/assets/montserrat_400i-bae33680.woff" as="font" type="font/woff" crossorigin="anonymous">
+	<link rel="preload" href="/assets/montserrat_700-64ca61b4.woff" as="font" type="font/woff" crossorigin="anonymous">
+	<link rel="preload" href="/assets/icomoon-34a84b6f.woff" as="font" type="font/woff" crossorigin="anonymous">
+
+	<script>window.dataLayer = window.dataLayer || [];
+window.dataLayer.push(["consent", "default", { ad_storage: "denied", ad_personalization: "denied", ad_user_data: "denied", analytics_storage: "denied" }]);</script>
+
+			<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-P4RN2WVP');</script>
+
+		<script>
+		window.sentryOnLoad = function () {
+			Sentry.init({
+				ignoreErrors: [
+					/fbq is not defined/,
+					/Can't find variable: fbq/,
+				],
+				denyUrls: [
+					/googletagmanager\.com\/gtm\.js/,
+					/gtm\.js/,
+				],
+			});
+		};
+	</script>
+	<script src="https://sentry.buildio.cz/js-sdk-loader/833042af2d9f420b0988bd8b14452208.min.js" crossorigin="anonymous"></script>
+
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<title>Jídelníček | Fitness Food Menu</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon-6b9e8f4f.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32-d68bd6ca.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16-8d19a41d.png">
+<link rel="manifest" href="">
+<link rel="mask-icon" href="/assets/favicon/safari-pinned-tab-8994a194.svg" color="#efab41">
+<link rel="shortcut icon" href="/assets/favicon/favicon-a4264e8f.ico">
+<meta name="msapplication-TileColor" content="#efab41">
+<meta name="msapplication-config" content="">
+<meta name="theme-color" content="#ffffff">
+
+	<style>@font-face{font-family:Roboto;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmSU5fChc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0100-024F,U+0259,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Roboto;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmSU5fBBc4AMP6lQ.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}</style>
+	<style>@font-face{font-family:Roboto;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu7GxKKTU1Kvnz.woff2) format('woff2');unicode-range:U+0100-024F,U+0259,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Roboto;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}</style>
+	<style>@font-face{font-family:Roboto;font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9fChc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0100-024F,U+0259,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Roboto;font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9fBBc4AMP6lQ.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}</style>
+	<style>@font-face{font-family:Roboto;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlfChc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0100-024F,U+0259,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Roboto;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlfBBc4AMP6lQ.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}</style>
+
+	<link rel="stylesheet" href="/assets/application-15413068.css" media="all" />
+
+	<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="73NnZUi1eUuy8uzq-LcGY1PfD6YbO4GcfaKGHGgN4Dk6UXBQXOqBPlwB3ES2H_fLdj5nOXv0VuoaN8-nniC6Ng" />
+	
+
+</head>
+<body>
+			<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P4RN2WVP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+	<script src="/assets/application-8bf92530.js" async="async" defer="defer"></script>
+	<script src="/assets/map-7b149d9d.js" async="async" defer="defer"></script>
+	<script></script>
+
+<div class='page-header'>
+<div class='page-header-bg'>
+
+
+<picture><source type="image/webp" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM3NywicHVyIjoiYmxvYl9pZCJ9fQ==--5f61e2f1bd578e23e2ef11128ed7097909bdd4bc/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NSwicmVzaXplX3RvX2xpbWl0IjpbMTk4MCxudWxsXX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--512d8826d51f03c90d9fb6d6b2338dbb9c4974fd/intro.jpg 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM3NywicHVyIjoiYmxvYl9pZCJ9fQ==--5f61e2f1bd578e23e2ef11128ed7097909bdd4bc/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NSwicmVzaXplX3RvX2xpbWl0IjpbMzk2MCxudWxsXX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--493b0a7708bec18d4c6d51092b437c7513527b1a/intro.jpg 2x"><img alt="Fitness Food Menu" class="img-cover img-cover-top img-jpg" width="1980" height="1114" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM3NywicHVyIjoiYmxvYl9pZCJ9fQ==--5f61e2f1bd578e23e2ef11128ed7097909bdd4bc/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJqcGciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1LCJyZXNpemVfdG9fbGltaXQiOlsxOTgwLG51bGxdLCJzYW1wbGluZ19mYWN0b3IiOiI0OjI6MCIsImludGVybGFjZSI6IkpQRUciLCJjb2xvcnNwYWNlIjoic1JHQiJ9LCJwdXIiOiJ2YXJpYXRpb24ifX0=--1e879a7de1b07895f6760918a258aa0d7fbee8cb/intro.jpg 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM3NywicHVyIjoiYmxvYl9pZCJ9fQ==--5f61e2f1bd578e23e2ef11128ed7097909bdd4bc/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJqcGciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1LCJyZXNpemVfdG9fbGltaXQiOlszOTYwLG51bGxdLCJzYW1wbGluZ19mYWN0b3IiOiI0OjI6MCIsImludGVybGFjZSI6IkpQRUciLCJjb2xvcnNwYWNlIjoic1JHQiJ9LCJwdXIiOiJ2YXJpYXRpb24ifX0=--a28876b7a43631d126bbfce365e502a615e8b704/intro.jpg 2x" src="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM3NywicHVyIjoiYmxvYl9pZCJ9fQ==--5f61e2f1bd578e23e2ef11128ed7097909bdd4bc/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJqcGciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1LCJyZXNpemVfdG9fbGltaXQiOlsxOTgwLG51bGxdLCJzYW1wbGluZ19mYWN0b3IiOiI0OjI6MCIsImludGVybGFjZSI6IkpQRUciLCJjb2xvcnNwYWNlIjoic1JHQiJ9LCJwdXIiOiJ2YXJpYXRpb24ifX0=--1e879a7de1b07895f6760918a258aa0d7fbee8cb/intro.jpg" /></picture>
+</div>
+<div class='page-header-fg'>
+<div class='container-fluid-xxl'>
+<div class='row'>
+<div class='col-auto order-2'>
+<a class="page-logo" href="/"><picture><source type="image/webp" srcset="/assets/logo_214w-e629a10e.webp 214w, /assets/logo_428w-72c18cab.webp 428w, /assets/logo_840w-2a85231a.webp 840w" sizes="(min-width: 1200px) 330px, (min-width: 992px) 240px, 214px" /><img alt="Fitness Food Menu" width="214" height="64" src="/assets/logo_214w-76c7328b.png" /></picture>
+</a></div>
+<div class='col-12 order-1 col-lg order-lg-2'>
+<div class='page-top font-weight-light'>
+<div class='row justify-content-end'>
+<div class='col-auto d-none d-lg-block'>
+<a class="link-nodecoration text-uppercase" href="/novinky">Novinky a blog
+</a>&nbsp; | &nbsp;
+<a class="link-nodecoration text-uppercase" href="/stranky/franchising">Franchising
+</a></div>
+<div class='col-auto'>
+<span class="icm icm-mobile icm-lg"></span> 
++420 773 772 732
+&nbsp; | &nbsp;
+<a class="link-nodecoration mr-2" title="instagram" href="https://www.instagram.com/ffmenu_fitnessfoodmenu/"><span class="icm icm-instagram icm-lg"></span> 
+</a><a class="link-nodecoration" title="facebook" href="https://www.facebook.com/ffmenu"><span class="icm icm-facebook-square icm-lg"></span> 
+</a></div>
+</div>
+</div>
+<div class='page-navigation d-none d-lg-block'>
+<div class='text-right d-lg-none'>
+<a class="link-nodecoration" data-fade=".page-navigation" title="zavřít" href="#"><span class="icm icm-times icm-lg"></span> 
+</a></div>
+<ul class='page-navigation-items'>
+<li class="page-navigation-item order-2"><a class="link-nodecoration " href="/produkty">Programy
+</a></li><li class="page-navigation-item order-2 active"><a class="link-nodecoration " aria-current="page" href="/jidelnicek">Jídelníček
+</a></li><li class="page-navigation-item order-2 d-lg-none"><a class="link-nodecoration " href="/novinky">Novinky a blog
+</a></li><li class="page-navigation-item order-2"><a class="link-nodecoration " href="/cenik">Ceník
+</a></li><li class="page-navigation-item order-2"><a class="link-nodecoration " href="/bmr-kalkulacka/new">BMR
+</a></li><li class="page-navigation-item order-2 d-lg-none active"><a class="link-nodecoration " aria-current="page" href="#">Franchising
+</a></li><li class="page-navigation-item order-2"><a class="link-nodecoration " href="/kontakty">Kontakty
+</a></li><li class='page-navigation-item order-1 order-lg-2'>
+<a class="btn btn-light text-nowrap" href="/objednavky/new/product"><span class="icm icm-shopping-basket"></span> 
+Objednat
+</a></li>
+</ul>
+</div>
+</div>
+<div class='col-auto ml-auto order-3 d-lg-none'>
+<a class="page-hamburger link-nodecoration" data-fade=".page-navigation" title="Menu" href="#"><span class="icm icm-bars icm-2x"></span> 
+</a></div>
+</div>
+
+</div>
+</div>
+</div>
+<div class='page-boxes'>
+<div class='container-fluid-xxl'>
+<div class='row justify-content-center'>
+<div class='col-6 col-sm-auto'>
+<a class="page-box" href="/objednavky/new/product?product_variant%5Bproduct_id%5D=1"><picture><source type="image/webp" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/box.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/box.png 2x"><img width="301" height="226" alt="" class="img-fluid img-png" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png 2x" src="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png" /></picture>
+<div class='page-box-btn'>
+<div class='btn btn-outline-light'>
+<span class="icm icm-shopping-basket"></span> 
+<span class='d-none d-lg-inline'>Objednat</span>
+</div>
+</div>
+<div class='page-box-title' style='background-color: #466c40;'>
+<span class="icm icm-heart"></span> 
+Racio
+</div>
+</a></div>
+<div class='col-6 col-sm-auto'>
+<a class="page-box" href="/objednavky/new/product?product_variant%5Bproduct_id%5D=2"><picture><source type="image/webp" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/box.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/box.png 2x"><img width="301" height="226" alt="" class="img-fluid img-png" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png 2x" src="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png" /></picture>
+<div class='page-box-btn'>
+<div class='btn btn-outline-light'>
+<span class="icm icm-shopping-basket"></span> 
+<span class='d-none d-lg-inline'>Objednat</span>
+</div>
+</div>
+<div class='page-box-title' style='background-color: #8b1717;'>
+<span class="icm icm-muscle"></span> 
+Muscle
+</div>
+</a></div>
+<div class='col-6 col-sm-auto'>
+<a class="page-box" href="/objednavky/new/product?product_variant%5Bproduct_id%5D=3"><picture><source type="image/webp" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/box.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/box.png 2x"><img width="301" height="226" alt="" class="img-fluid img-png" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png 2x" src="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1MywicHVyIjoiYmxvYl9pZCJ9fQ==--2871df71c7146f685a3bf5bab39514fe51d926e1/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/box.png" /></picture>
+<div class='page-box-btn'>
+<div class='btn btn-outline-light'>
+<span class="icm icm-shopping-basket"></span> 
+<span class='d-none d-lg-inline'>Objednat</span>
+</div>
+</div>
+<div class='page-box-title' style='background-color: #ddb800;'>
+<span class="icm icm-low-carb"></span> 
+Low carb
+</div>
+</a></div>
+</div>
+</div>
+</div>
+<div class='page-main'>
+<div class='section section-sm'>
+<div class='container-fluid-xxl'>
+<div class='section-h1'>
+<h1>Jídelníček</h1>
+</div>
+<div class='row justify-content-center align-items-center'>
+<div class='col-12 col-sm-auto order-sm-2 mb-3 mb-sm-5 text-center'>
+<div class='font-weight-bold mb-2'>23. &ndash;&nbsp;29.&nbsp;listopadu&nbsp;2026</div>
+<div class='row justify-content-center'>
+<div class='col-auto'>
+<a target="_blank" href="/jidelnicek.pdf?product_variant_id=1&amp;weeks=0"><span class="icm icm-print"></span> 
+PDF
+</a></div>
+</div>
+</div>
+<div class='col mb-5 text-right'>
+</div>
+<div class='col mb-5 order-sm-2'>
+<a class="news-slider-control" href="/jidelnicek?product_variant_id=1&amp;weeks=1"><span class="icm icm-arrow-right"></span> 
+</a></div>
+</div>
+<div class='form-row justify-content-center mb-3'>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-primary active" aria-current="page" href="/jidelnicek?product_variant_id=1&amp;weeks=0"><span class="icm icm-heart icm-lg"></span> 
+Racio
+</a></div>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-primary" href="/jidelnicek?product_variant_id=2&amp;weeks=0"><span class="icm icm-muscle icm-lg"></span> 
+Muscle
+</a></div>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-primary" href="/jidelnicek?product_variant_id=3&amp;weeks=0"><span class="icm icm-low-carb icm-lg"></span> 
+Low carb
+</a></div>
+</div>
+<div class='form-row justify-content-center mb-5'>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-secondary active" aria-current="page" href="/jidelnicek?product_variant_id=1&amp;weeks=0">6 000 kJ
+</a></div>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-secondary" href="/jidelnicek?product_variant_id=5&amp;weeks=0">7 500 kJ
+</a></div>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-secondary" href="/jidelnicek?product_variant_id=6&amp;weeks=0">9 000 kJ
+</a></div>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-secondary" href="/jidelnicek?product_variant_id=7&amp;weeks=0">10 500 kJ
+</a></div>
+<div class='col-auto mb-2'>
+<a class="btn btn-outline-secondary" href="/jidelnicek?product_variant_id=9&amp;weeks=0">12 000 kJ
+</a></div>
+</div>
+<div class='section-h3'>
+<h2>
+Pondělí
+&ndash;
+23. listopadu 2026
+</h2>
+</div>
+<div class='row mb-6'>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Snídaně</div>
+</div>
+<div class='mb-1 font-weight-bold'>Vajíčková pomazánka s žitným chlebem</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;263 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+13,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+22,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+24,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,40 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Ovesná kaše s proteinem a borůvkami</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;345 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 7, 8
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+12,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+33,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+20,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+4,80 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Oběd</div>
+</div>
+<div class='mb-1 font-weight-bold'>Krůtí prsa, dušené pikantní zelí a grenaille</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;095 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+8,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+26,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+21,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+1,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Fitness jablečný závin</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;087 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+11,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+31,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+9,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Večeře</div>
+</div>
+<div class='mb-1 font-weight-bold'>Pad Thai s vepřovou panenkou</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;217 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 6, 11
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+9,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+33,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+19,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,00 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='product-select-container h-100 d-flex flex-column justify-content-center'>
+<div class='text-center mb-4'>
+Celkem
+<br>
+<div class='font-weight-bold text-large'>
+6&nbsp;007 kJ
+</div>
+</div>
+<div class='row justify-content-center'>
+<div class='col-auto headings-line-height mb-3'>
+<small>Tuky</small>
+<br>
+<strong>53,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Sacharidy</small>
+<br>
+<strong>145,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Bílkoviny</small>
+<br>
+<strong>93,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Cholesterol</small>
+<br>
+<strong>0 mg</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Vláknina</small>
+<br>
+<strong>14,20 g</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class='section-h3'>
+<h2>
+Úterý
+&ndash;
+24. listopadu 2026
+</h2>
+</div>
+<div class='row mb-6'>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Snídaně</div>
+</div>
+<div class='mb-1 font-weight-bold'>Domácí mussli s ořechovým jogurtem a ovocem</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;385 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 7, 8
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+14,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+35,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+16,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Lilková pomazánka s chlebem</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;073 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+12,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+23,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+14,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,90 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Oběd</div>
+</div>
+<div class='mb-1 font-weight-bold'>Trhané kuře na paprice se štouchaným petrželkovým bramborem</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;189 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+11,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+24,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+22,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,00 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Proteinový koláč</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;169 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+10,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+29,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+18,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Večeře</div>
+</div>
+<div class='mb-1 font-weight-bold'>Treska s rajčatovou omáčkou a bulgurovým salátem</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;183 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 4
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+9,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+30,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+20,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+1,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='product-select-container h-100 d-flex flex-column justify-content-center'>
+<div class='text-center mb-4'>
+Celkem
+<br>
+<div class='font-weight-bold text-large'>
+5&nbsp;999 kJ
+</div>
+</div>
+<div class='row justify-content-center'>
+<div class='col-auto headings-line-height mb-3'>
+<small>Tuky</small>
+<br>
+<strong>56,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Sacharidy</small>
+<br>
+<strong>141,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Bílkoviny</small>
+<br>
+<strong>90,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Cholesterol</small>
+<br>
+<strong>0 mg</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Vláknina</small>
+<br>
+<strong>13,40 g</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class='section-h3'>
+<h2>
+Středa
+&ndash;
+25. listopadu 2026
+</h2>
+</div>
+<div class='row mb-6'>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Snídaně</div>
+</div>
+<div class='mb-1 font-weight-bold'>Omeleta se sýrem, slaninou a zeleninkou na másle</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;150 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+3, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+15,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+9,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+26,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,00 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Kuřecí vývar se zeleninou a nudlemi</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+965 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 7, 9
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+10,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+20,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+15,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,90 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Oběd</div>
+</div>
+<div class='mb-1 font-weight-bold'>Kuřecí prsa v houbové omáčce s jasmínovou rýží</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;322 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+10,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+38,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+18,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,10 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Ovocný jogurt s vlašskými ořechy</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;329 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+7, 8
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+18,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+24,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+15,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+1,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Večeře</div>
+</div>
+<div class='mb-1 font-weight-bold'>Gnocchi v krémové omáčce z pečené dýně</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;240 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+11,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+35,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+14,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='product-select-container h-100 d-flex flex-column justify-content-center'>
+<div class='text-center mb-4'>
+Celkem
+<br>
+<div class='font-weight-bold text-large'>
+6&nbsp;006 kJ
+</div>
+</div>
+<div class='row justify-content-center'>
+<div class='col-auto headings-line-height mb-3'>
+<small>Tuky</small>
+<br>
+<strong>64,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Sacharidy</small>
+<br>
+<strong>126,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Bílkoviny</small>
+<br>
+<strong>88,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Cholesterol</small>
+<br>
+<strong>0 mg</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Vláknina</small>
+<br>
+<strong>13,00 g</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class='section-h3'>
+<h2>
+Čtvrtek
+&ndash;
+26. listopadu 2026
+</h2>
+</div>
+<div class='row mb-6'>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Snídaně</div>
+</div>
+<div class='mb-1 font-weight-bold'>Francouzský toast</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;419 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 5, 7, 8
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+14,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+33,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+20,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+4,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Uzená fazolová pomazánka se sučenými rajčaty, knackebrot</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;141 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+7, 9
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+12,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+30,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+11,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,20 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Oběd</div>
+</div>
+<div class='mb-1 font-weight-bold'>Hovězí na víně s kaší z pečeného květáku</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;061 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+7, 9, 12
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+8,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+27,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+18,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,20 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Tvarohový dezert s jahodami</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;095 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+8,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+28,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+19,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,90 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Večeře</div>
+</div>
+<div class='mb-1 font-weight-bold'>Kuřecí stehenní steak s černou rýží, pečenou zeleninou a mango-chilli dipem</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;282 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 6, 11
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+8,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+38,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+20,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,40 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='product-select-container h-100 d-flex flex-column justify-content-center'>
+<div class='text-center mb-4'>
+Celkem
+<br>
+<div class='font-weight-bold text-large'>
+5&nbsp;998 kJ
+</div>
+</div>
+<div class='row justify-content-center'>
+<div class='col-auto headings-line-height mb-3'>
+<small>Tuky</small>
+<br>
+<strong>50,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Sacharidy</small>
+<br>
+<strong>156,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Bílkoviny</small>
+<br>
+<strong>88,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Cholesterol</small>
+<br>
+<strong>0 mg</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Vláknina</small>
+<br>
+<strong>17,20 g</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class='section-h3'>
+<h2>
+Pátek
+&ndash;
+27. listopadu 2026
+</h2>
+</div>
+<div class='row mb-6'>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Snídaně</div>
+</div>
+<div class='mb-1 font-weight-bold'>Kváskový chléb s&nbsp;bylinkovou lučinou</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;186 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+10,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+28,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+20,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,00 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Kari mkrvový krém</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+962 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+9,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+25,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+12,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,50 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Oběd</div>
+</div>
+<div class='mb-1 font-weight-bold'>Francouzské brambory</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;317 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+3, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+14,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+25,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+22,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,10 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Svačina</div>
+</div>
+<div class='mb-1 font-weight-bold'>Arašídový koláč</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span></span></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;169 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 5, 7
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+10,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+30,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+17,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+2,90 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='position-relative product-select-container h-100 d-flex flex-column'>
+<div class='product-select-container-tags'>
+<div class='news-slider-tag news-slider-tag-ternary'>Večeře</div>
+</div>
+<div class='mb-1 font-weight-bold'>Spaghetti con polpette, rajčatová omáčka</div>
+<div class='row mb-1 align-items-center'>
+<div class='col'><span class="rating-stars"><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-secondary"></span><span class="icm icm-star-full text-gray"></span><span class="icm icm-star-full text-gray"></span></span></div>
+<div class='col-auto'>
+<a class="btn btn-sm btn-primary" data-modal="ajax" href="/jidelnicek/1128/rating">Hodnotit
+</a></div>
+</div>
+<div class='row justify-content-between align-items-baseline mb-2 mt-auto'>
+<div class='col-auto text-large font-weight-bold'>
+1&nbsp;379 kJ
+</div>
+<div class='col-auto text-muted'>
+Alergeny:
+1, 3, 7, 12
+</div>
+</div>
+<div class='form-row justify-content-xxl-between'>
+<div class='col-auto headings-line-height mb-2'>
+<small>Tuky</small>
+<br>
+12,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Sacharidy</small>
+<br>
+34,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Bílkoviny</small>
+<br>
+21,00 g
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Cholesterol</small>
+<br>
+0 mg
+</div>
+<div class='col-auto headings-line-height mb-2'>
+<small>Vláknina</small>
+<br>
+3,00 g
+</div>
+</div>
+</div>
+</div>
+<div class='col-sm-6 col-lg-4 mb-5'>
+<div class='product-select-container h-100 d-flex flex-column justify-content-center'>
+<div class='text-center mb-4'>
+Celkem
+<br>
+<div class='font-weight-bold text-large'>
+6&nbsp;013 kJ
+</div>
+</div>
+<div class='row justify-content-center'>
+<div class='col-auto headings-line-height mb-3'>
+<small>Tuky</small>
+<br>
+<strong>55,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Sacharidy</small>
+<br>
+<strong>142,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Bílkoviny</small>
+<br>
+<strong>92,00 g</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Cholesterol</small>
+<br>
+<strong>0 mg</strong>
+</div>
+<div class='col-auto headings-line-height mb-3'>
+<small>Vláknina</small>
+<br>
+<strong>14,50 g</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p class='text-center font-weight-bold'>Přejeme Vám dobrou chuť. V případě jakýchkoli otázek nás neváhejte kontaktovat.</p>
+<p class='font-weight-bold text-primary'>Seznam alergenů:</p>
+<ol>
+<li>Obiloviny obsahující lepek</li>
+<li>Korýši a výrobky z nich</li>
+<li>Vejce a výrobky z nich</li>
+<li>Ryby a výrobky z nich</li>
+<li>Jádra podzemnice olejné(arašídy) a výrobky z nich</li>
+<li>Sójové boby a výrobky z nich</li>
+<li>Mléko a výrobky z něj</li>
+<li>Skořápkové plody: mandle, lískové ořechy, vlašské ořechy, kešu ořechy, pekanové ořechy, para ořechy, pistácie, makadamie a výrobky z nich</li>
+<li>Celer a výrobky z něj</li>
+<li>Hořčice a výrobky z ní</li>
+<li>Sezamová semena a výrobky z nich</li>
+<li>Oxid siřičitý a siřičitany v koncentracích vyšších než 10 mg/kg</li>
+<li>Vlčí bob a výrobky z něj</li>
+<li>Měkkýši a výrobky z nich</li>
+</ol>
+</div>
+</div>
+
+</div>
+<div class='page-footer'>
+<div class='container-fluid-xxl'>
+<div class='row'>
+<div class='col-12 mb-3 col-lg-auto order-lg-1 mb-lg-4'>
+<a class="page-footer-logo" href="/"><picture><source type="image/webp" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1NCwicHVyIjoiYmxvYl9pZCJ9fQ==--854f2e3bda8927572ac4953a1c148e53539d1072/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/logo_white.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1NCwicHVyIjoiYmxvYl9pZCJ9fQ==--854f2e3bda8927572ac4953a1c148e53539d1072/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJ3ZWJwIiwic3RyaXAiOnRydWUsImF1dG9fb3JpZW50Ijp0cnVlLCJxdWFsaXR5Ijo4NX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--59815fb79d54e8b9c8f6dbb06b05916f3b36e937/logo_white.png 2x"><img alt="Fitness Food Menu" width="424" height="108" class="img-png" srcset="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1NCwicHVyIjoiYmxvYl9pZCJ9fQ==--854f2e3bda8927572ac4953a1c148e53539d1072/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/logo_white.png 1x, https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1NCwicHVyIjoiYmxvYl9pZCJ9fQ==--854f2e3bda8927572ac4953a1c148e53539d1072/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/logo_white.png 2x" src="https://www.ffmenu.cz/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM1NCwicHVyIjoiYmxvYl9pZCJ9fQ==--854f2e3bda8927572ac4953a1c148e53539d1072/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJzdHJpcCI6dHJ1ZSwiYXV0b19vcmllbnQiOnRydWUsInF1YWxpdHkiOjg1fSwicHVyIjoidmFyaWF0aW9uIn19--5a088d0afd5c247f8ed115f219d6267ed53a6150/logo_white.png" /></picture>
+</a></div>
+<div class='col-12 mb-4 order-lg-2 col-xl-auto'>
+<div class='page-footer-motto mb-xl-4'>Dodavatel krabičkové fitness stravy</div>
+<div class='d-none d-xl-block'>
+<div class='mb-3'>
+<a class="page-footer-link" href="/stranky/storno-podminky">Storno podmínky</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/pravidla-zavozu-ffmenu">Pravidla závozu FFMENU</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/obchodni-podminky">Obchodní podmínky</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/reklamacni-rad">Reklamační řád</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/gdpr-a-cookies">GDPR a cookies</a>
+</div>
+</div>
+</div>
+<div class='col-12 align-self-center mb-4 col-lg order-lg-1 mb-lg-0'>
+<ul class='page-footer-navigation justify-content-lg-center'>
+<li><a class="page-footer-navigation-link " href="/stranky/franchising">Franchising</a></li>
+<li><a class="page-footer-navigation-link " href="/novinky">Novinky a blog</a></li>
+</ul>
+</div>
+<div class='col-12 order-lg-3 col-xl'>
+<div class='row'>
+<div class='col-auto mb-5'>
+<h3 class='page-footer-h1'>
+Fakturační údaje:
+</h3>
+<p class='mb-2'>BeraTaste s.r.o.</p>
+<div class='clip-content'>
+<p>Jiráskova 495<br>537 01&nbsp; &nbsp;Chrudim</p>
+<p>IČ: 22482261</p>
+</div>
+<p class='mb-0'>DIČ: CZ22482261</p>
+</div>
+<div class='col-auto mb-5'>
+<h3 class='page-footer-h1'>Kontakty:</h3>
+<p class='mb-2'>
+<span class='page-footer-title'>
+<span class="icm icm-phone-square mr-1"></span> 
+zavolejte na konzultaci:
+</span>
+<span class='text-nowrap'>
++420 773 772 732
+</span>
+</p>
+<p class='mb-0'>
+<span class='page-footer-title'>
+<span class="icm icm-envelope mr-1"></span> 
+napište nám:
+</span>
+<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="462f2820290620202b23283368253c">[email&#160;protected]</a>
+</p>
+</div>
+</div>
+</div>
+<div class='col-12 align-self-center text-center mb-4 col-lg-auto order-lg-1 mb-lg-0'>
+<a class="page-footer-navigation-link mr-3" title="Instagram" href="https://www.instagram.com/ffmenu_fitnessfoodmenu/"><span class="icm icm-instagram icm-lg"></span> 
+</a> 
+<a class="page-footer-navigation-link" title="Facebook" href="https://www.facebook.com/ffmenu"><span class="icm icm-facebook-square icm-lg"></span> 
+</a></div>
+<div class='col-12 order-lg-1'></div>
+<div class='col-12 text-center order-lg-3 d-xl-none'>
+<div class='mb-3'>
+<a class="page-footer-link" href="/stranky/storno-podminky">Storno podmínky</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/pravidla-zavozu-ffmenu">Pravidla závozu FFMENU</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/obchodni-podminky">Obchodní podmínky</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/reklamacni-rad">Reklamační řád</a>
+&nbsp;<span class="page-footer-link-color">|</span>&nbsp;
+<a class="page-footer-link" href="/stranky/gdpr-a-cookies">GDPR a cookies</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class='page-copyright'>
+<div class='container-fluid-xxl'>
+Copyright 2026 FF MENU
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>
+

@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+config.local.json
+data/
+node_modules/
+
+# Editor/IDE local configs
+.[a-z]*/
+!.git/
+!.github/
+/[A-Z]*.md
+!/README.md
+!/README.cs.md
+!/PRIVACY.md
