@@ -14,9 +14,14 @@ English version: [README.md](README.md). Projekt nemá nic společného s FF Men
 
 ## Instalace
 
-1. Stáhni repozitář: `git clone https://github.com/nks-hub/ffmenu-kaloricky.git`.
-2. V Chrome otevři `chrome://extensions`, zapni Režim pro vývojáře, klikni na „Načíst rozbalené“ a vyber složku `extension`.
-3. Klikni na ikonu doplňku, zadej e-mail a heslo do Kalorických tabulek a dej „Uložit a ověřit“. Pod tlačítkem se ukáže, jestli přihlášení prošlo.
+Chrome na Windows a macOS instaluje doplňky mimo Chrome Web Store jen v režimu pro vývojáře. Než bude doplněk v obchodě, instaluje se takhle:
+
+1. Stáhni repozitář a sestav balíček: `git clone https://github.com/nks-hub/ffmenu-kaloricky.git`, pak v jeho složce `python tools/build_extension.py`. Vznikne `dist/ffmenu-kt-<verze>.zip`.
+2. Zip rozbal do složky, kterou nebudeš mazat, protože Chrome z ní doplněk načítá při každém spuštění.
+3. V Chrome otevři `chrome://extensions`, zapni Režim pro vývojáře, klikni na „Načíst rozbalené“ a vyber tu složku.
+4. Klikni na ikonu doplňku, zadej e-mail a heslo do Kalorických tabulek a dej „Uložit a ověřit“. Pod tlačítkem se ukáže, jestli přihlášení prošlo.
+
+Stejný zip se nahrává do Chrome Web Store. Texty zápisu, odpovědi k ochraně soukromí a obrázky jsou v [store/listing.md](store/listing.md).
 
 Doplněk načte i Firefox 121 a novější. Část na stránce jídelníčku jsem zkoušel ve Firefoxu 160.
 

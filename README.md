@@ -24,12 +24,19 @@
 
 ## Installation
 
+Chrome on Windows and macOS installs extensions from outside the Chrome Web Store only in Developer mode, so until the extension is in the store:
+
 ```
 git clone https://github.com/nks-hub/ffmenu-kaloricky.git
+cd ffmenu-kaloricky
+python tools/build_extension.py   # writes dist/ffmenu-kt-<version>.zip
 ```
 
-1. Open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick the `extension` folder.
-2. Click the extension icon, enter your Kalorické tabulky email and password and press "Uložit a ověřit". The status line confirms the login.
+1. Unzip `dist/ffmenu-kt-<version>.zip` into a folder you keep (Chrome loads the extension from it on every start).
+2. Open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick that folder.
+3. Click the extension icon, enter your Kalorické tabulky email and password and press "Uložit a ověřit". The status line confirms the login.
+
+The same zip is the upload for the Chrome Web Store; the listing texts, privacy answers and graphics are in [store/listing.md](store/listing.md).
 
 ## Usage
 
