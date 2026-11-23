@@ -118,34 +118,75 @@ function multipart(data, photo) {
   return { body: new Blob(parts), type: `multipart/form-data; boundary=${boundary}` };
 }
 
+const apiHeaders = (hash) => ({ hash, version: APP_PARAMS.v, pid: APP_PARAMS.pid, lang: "cs" });
+
+// FF Menu gives values per portion without its weight, so one portion is declared as 100 g
+function values100g(meal) {
+  return {
+    energy: String(meal.kj),
+    energy_unit: "kj",
+    protein: String(meal.protein),
+    carbohydrate: String(meal.carbs),
+    fat: String(meal.fat),
+    fiber: String(meal.fiber),
+  };
+}
+
+async function readJson(response) {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new KTError(response.status, data.error || data.message || response.statusText);
+  return data;
+}
+
+// The duplicate check of the KT app ("search/duplicates") matches foods by values, including foods still
+// waiting for approval and foods of other users. It rejects foodstuff_type_id in any format.
+async function findFood(hash, meal) {
+  const response = await fetchRetrying(new URL("api/v1/food-suggestion/search/duplicates", KT_URL), {
+    method: "POST",
+    headers: { ...apiHeaders(hash), "Content-Type": "application/json" },
+    body: JSON.stringify(values100g(meal)),
+  });
+  const name = `FF Menu: ${meal.name}`;
+  const ours = ((await readJson(response)).items || [])
+    .filter((item) => item.title === name || item.title.startsWith(`${name} (`));
+  return (ours.find((item) => item.title === foodTitle(meal)) || ours[0])?.id;
+}
+
+const foodTitle = (meal) => `FF Menu: ${meal.name} (${meal.kj} kJ)`;
+
 async function createFood(hash, meal, title) {
-  // FF Menu gives values per portion without its weight, so one portion is declared as 100 g.
-  // KT rejects a food without category, sugar and salt; FF Menu publishes neither of the two, so they are 0.
+  // KT rejects a food without category, sugar and salt; FF Menu publishes neither of the two, so they are 0
   const { body, type } = multipart({
+    ...values100g(meal),
     title,
     foodstuff_type_id: READY_MEALS_CATEGORY,
     unit_name: "porce",
     unit_multiplier: "100",
     foodstuff_unit: "100g",
-    energy: String(meal.kj),
-    energy_unit: "kj",
-    protein: String(meal.protein),
-    carbohydrate: String(meal.carbs),
     sugar: "0",
-    fat: String(meal.fat),
     salt: "0",
-    fiber: String(meal.fiber),
     cholesterol: String(meal.cholesterol),
   }, await sourceCard(meal));
   const response = await fetchRetrying(new URL("api/v1/food-suggestion/foodstuff?force=true", KT_URL), {
     method: "POST",
-    headers: { hash, version: APP_PARAMS.v, pid: APP_PARAMS.pid, lang: "cs", "Content-Type": type },
+    headers: { ...apiHeaders(hash), "Content-Type": type },
     body,
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new KTError(response.status, data.error || data.message || response.statusText);
+  const data = await readJson(response);
   if (!data.foodstuff_guid) throw new KTError(0, "Kalorické tabulky nevrátily ID nové potraviny");
   return data.foodstuff_guid;
+}
+
+async function findOrCreateFood(hash, meal) {
+  const existing = await findFood(hash, meal);
+  if (existing) return existing;
+  try {
+    return await createFood(hash, meal, foodTitle(meal));
+  } catch (error) {
+    // KT answers 500 for a title it already has; with other values the duplicate check misses it
+    if (error.code !== 500) throw error;
+    return createFood(hash, meal, `${foodTitle(meal)} · ${crypto.randomUUID().slice(0, 4)}`);
+  }
 }
 
 function validMeal(meal) {
@@ -161,15 +202,7 @@ async function foodQr(meal) {
   const key = `food:${md5(JSON.stringify(values))}`;
   let guid = (await chrome.storage.local.get(key))[key];
   if (!guid) {
-    // the portion energy tells programs apart; KT answers 500 for a title it already has, so a repeat
-    // (another user's food, or this dish created before the browser data was cleared) gets a suffix
-    const title = `FF Menu: ${meal.name} (${meal.kj} kJ)`;
-    try {
-      guid = await withSession((hash) => createFood(hash, meal, title));
-    } catch (error) {
-      if (error.code !== 500) throw error;
-      guid = await withSession((hash) => createFood(hash, meal, `${title} · ${crypto.randomUUID().slice(0, 4)}`));
-    }
+    guid = await withSession((hash) => findOrCreateFood(hash, meal));
     await chrome.storage.local.set({ [key]: guid });
   }
   return QR_FOOD_PREFIX + guid;

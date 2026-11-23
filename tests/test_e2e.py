@@ -122,6 +122,29 @@ class ExtensionTest(unittest.TestCase):
         self.assertEqual(self.scan(page, "1:2026-11-24:2"), first)
         self.assertEqual(len(self.kt.foods), 25)
 
+    PORRIDGE_VALUES = {"energy": "1345", "energy_unit": "kj", "protein": "20", "carbohydrate": "33", "fat": "12",
+                       "fiber": "4.8"}
+
+    def qr_guid_with_existing_food(self, title):
+        self.kt.foods["a" * 32] = {"title": title, **self.PORRIDGE_VALUES}
+        self.log_in()
+        page = self.open_menu()
+        self.wait_all_qr(page)
+        return self.scan(page, "1:2026-11-23:1").rsplit("/", 1)[1]
+
+    def test_food_already_in_kt_is_reused_instead_of_created(self):
+        guid = self.qr_guid_with_existing_food("FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)")
+
+        self.assertEqual(guid, "a" * 32)
+        porridges = [f for f in self.kt.foods.values() if "Ovesná kaše" in f["title"]]
+        self.assertEqual(len(porridges), 1)
+
+    def test_food_from_an_older_version_without_energy_in_title_is_reused(self):
+        self.assertEqual(self.qr_guid_with_existing_food("FF Menu: Ovesná kaše s proteinem a borůvkami"), "a" * 32)
+
+    def test_other_food_with_the_same_values_is_not_reused(self):
+        self.assertNotEqual(self.qr_guid_with_existing_food("Ovesná kaše domácí"), "a" * 32)
+
     def test_title_kt_already_has_gets_a_suffix(self):
         self.kt.foods["0" * 32] = {"title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)"}
         self.log_in()

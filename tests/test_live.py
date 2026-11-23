@@ -60,6 +60,13 @@ class Diary:
         return [(slot["id"], item) for slot in summary["intake"]["diary_times"]
                 for item in slot["items"] if item["title"].startswith("FF Menu: ")]
 
+    def ff_foods(self, meal):
+        """FF Menu foods KT already has with the meal's values, by the KT app's duplicate check."""
+        values = {"energy": f"{meal.kj:g}", "energy_unit": "kj", "protein": f"{meal.protein:g}",
+                  "carbohydrate": f"{meal.carbs:g}", "fat": f"{meal.fat:g}", "fiber": f"{meal.fiber:g}"}
+        items = self._api("v1/food-suggestion/search/duplicates", values)["items"]
+        return [item["id"] for item in items if item["title"].startswith(f"FF Menu: {meal.name}")]
+
     def delete(self, entries):
         if entries:
             self._api("v1/diary/delete", {"diary_foodstuff_ids": [item["id"] for _, item in entries]})
@@ -140,6 +147,7 @@ class LiveExtensionTest(unittest.TestCase):
         import zxingcpp
         from PIL import Image
         meal = parse_menu(self.menu, PROGRAM)[0]
+        known = Diary(self.client).ff_foods(meal)
         options = self.context.new_page()
         options.goto(self.options_url)
         options.fill("#email", EMAIL)
@@ -156,7 +164,12 @@ class LiveExtensionTest(unittest.TestCase):
         url = zxingcpp.read_barcodes(Image.open(io.BytesIO(box.locator("svg").screenshot())))[0].text
 
         self.assertRegex(url, r"^https://dine4fit\.com/food/[0-9a-f]{32}$")
-        food = Diary(self.client)._api(f"v1/foodstuff/{url.rsplit('/', 1)[1]}")
+        guid = url.rsplit("/", 1)[1]
+        # a dish KT already has is reused, so KT ends up with no new food for it
+        if known:
+            self.assertIn(guid, known)
+        self.assertEqual(len(Diary(self.client).ff_foods(meal)), max(len(known), 1))
+        food = Diary(self.client)._api(f"v1/foodstuff/{guid}")
         # a title KT already has (an earlier run) gets a short suffix
         self.assertRegex(food["title"], rf"^FF Menu: {re.escape(meal.name)} \({meal.kj:.0f} kJ\)( · [0-9a-f]{{4}})?$")
         self.assertIn({"title": "100 g", "multiplier": 100.0},

@@ -110,6 +110,8 @@ class FakeKT:
                     return self._send_json(400, {"message": "neznámý klient"})
                 if self.headers.get("hash") not in fake.hashes:
                     return self._send_json(401, {"message": "Unauthorized"})
+                if path == "/api/v1/food-suggestion/search/duplicates" and body is not None:
+                    return self._duplicates(json.loads(body))
                 if path != "/api/v1/food-suggestion/foodstuff" or body is None or q.get("force") != "true":
                     return self._send_json(404, {"message": "Not found"})
                 message = email.message_from_bytes(
@@ -141,6 +143,16 @@ class FakeKT:
                 fake.foods[guid] = data
                 fake.food_images[guid] = images
                 self._send_json(200, {"foodstuff_guid": guid})
+
+            def _duplicates(self, values):
+                # like the real check: foods (pending ones too) whose values match, whoever created them
+                fields = ("energy", "energy_unit", "protein", "carbohydrate", "fat", "fiber")
+                if "foodstuff_type_id" in values:
+                    return self._send_json(400, {"error": "Parametr: 'foodstuff_type_id' je ve špatném formátu!"})
+                items = [{"id": guid, "title": food["title"], "domain": "foodstuff", "visibility": "new"}
+                         for guid, food in fake.foods.items()
+                         if all(food.get(f) == values.get(f) for f in fields)]
+                self._send_json(200, {"page": 0, "page_size": 10, "items": items})
 
             def _login(self, q):
                 if q.get("Email") != fake.email:
