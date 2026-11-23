@@ -4,15 +4,16 @@
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest_V3-4285F4?logo=googlechrome&logoColor=white)](extension/manifest.json)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](ffkt)
 
-> Chrome extension that shows a QR code next to every meal of the [ffmenu.cz](https://www.ffmenu.cz/jidelnicek) weekly menu. Scanning it with the [Kalorické tabulky](https://www.kaloricketabulky.cz) app opens the meal, with the energy and macros from the menu, ready to be added to your diary.
+> Chrome extension that shows a QR code for any meal of the [ffmenu.cz](https://www.ffmenu.cz/jidelnicek) weekly menu. Scanning it with the [Kalorické tabulky](https://www.kaloricketabulky.cz) app opens the meal, with the energy and macros from the menu, ready to be added to your diary.
 
 Česká verze: [README.cs.md](README.cs.md). Not affiliated with FF Menu (BeraTaste s.r.o.) or Kalorické tabulky (Dine4Fit, a.s.).
 
 ## Features
 
-- 📱 **QR code per meal** - every meal card on ffmenu.cz/jidelnicek gets a QR code that the barcode scanner of the Kalorické tabulky app opens as a food
+- 📱 **QR code per meal** - a "Zobrazit QR pro Kalorické tabulky" button on every meal card shows a QR code that the barcode scanner of the Kalorické tabulky app opens as a food
+- 🔥 **kcal next to kJ** - the menu shows the energy in kcal as well, converted the way the Kalorické tabulky app does it
 - ⚖️ **Values from the menu** - energy, protein, carbohydrates, fat, fiber and cholesterol are read from the page, nothing is estimated
-- 🔁 **One food per dish** - the extension creates each dish in Kalorické tabulky once and reuses it when the dish comes back
+- 🔁 **No duplicates** - before creating a food the extension runs the Kalorické tabulky duplicate check and reuses an FF Menu food with the same values, created by anyone
 - 🔐 **Runs in the browser only** - the extension calls Kalorické tabulky directly and stores the MD5 hash of your password, not the password
 - 📷 **Optional label scanner** - a Python service with a phone page that reads the box label with OCR (Tesseract.js) and matches it to the menu, plus a command that logs a whole day
 
@@ -40,9 +41,9 @@ The same zip is the upload for the Chrome Web Store; the listing texts, privacy 
 
 ## Usage
 
-Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Below every meal a QR code appears. In the Kalorické tabulky app tap "Čárový kód", point the camera at the code and add the food that opens. The food is named `FF Menu: <meal> (<portion energy> kJ)` and one portion is entered as 100 g, because FF Menu does not publish the weight of a portion. Kalorické tabulky fails with an error on a title it already has, so a repeated title gets a four-character suffix.
+Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Below every meal there is a "Zobrazit QR pro Kalorické tabulky" button; clicking it shows the QR code. In the Kalorické tabulky app tap "Čárový kód", point the camera at the code and add the food that opens. The food is named `FF Menu: <meal> (<portion energy> kJ)` and one portion is entered as 100 g, because FF Menu does not publish the weight of a portion. Kalorické tabulky fails with an error on a title it already has, so a repeated title gets a four-character suffix.
 
-The extension creates the food under your account the first time it shows the meal. Kalorické tabulky makes new foods available to all its users, so these foods are public in their database.
+When you click, the extension looks for the meal in Kalorické tabulky and creates it under your account only if it is not there yet. Kalorické tabulky makes new foods available to all its users, so these foods are public in their database.
 
 ## Label scanner and daily import (optional)
 
@@ -99,7 +100,7 @@ FFKT_LIVE=1 FFKT_KT_EMAIL=... FFKT_KT_PASSWORD=... python -m unittest discover -
 
 - The Kalorické tabulky API is unofficial. If it changes, writing fails and the extension shows the error returned by Kalorické tabulky.
 - Foods created by the extension are public in the Kalorické tabulky database and show sugar and salt as 0.
-- Kalorické tabulky names the portion unit "100 g", so one FF Menu portion is entered as 100 g.
+- Kalorické tabulky ignores the portion unit of a new food (tried with "porce" at 100 g and 300 g) and keeps the food locked until its moderators approve it, so one FF Menu portion is entered as 100 g.
 - FF Menu publishes the next week's menu during the week. Until then there are no QR codes for it.
 
 ## Contributing

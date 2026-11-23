@@ -6,13 +6,13 @@ Texts and answers for the developer dashboard. Upload `dist/ffmenu-kt-<version>.
 
 **Name:** FF Menu do Kalorických tabulek
 
-**Summary:** QR kód u každého jídla na jídelníčku ffmenu.cz. Naskenuješ ho v aplikaci Kalorické tabulky a jídlo přidáš do deníku.
+**Summary:** QR kód k jídlům z jídelníčku ffmenu.cz. Naskenuješ ho v aplikaci Kalorické tabulky a jídlo přidáš do deníku.
 
 **Description:**
 
-Na jídelníčku ffmenu.cz ukáže pod každým jídlem QR kód. V aplikaci Kalorické tabulky klepneš na „Čárový kód“, namíříš fotoaparát na kód a otevře se jídlo s energií, bílkovinami, sacharidy, tuky, vlákninou a cholesterolem z jídelníčku. Pak ho jen přidáš do deníku.
+Na jídelníčku ffmenu.cz přidá ke každému jídlu tlačítko „Zobrazit QR pro Kalorické tabulky“ a k energii v kJ přepočet na kcal. V aplikaci Kalorické tabulky klepneš na „Čárový kód“, namíříš fotoaparát na kód a otevře se jídlo s energií, bílkovinami, sacharidy, tuky, vlákninou a cholesterolem z jídelníčku. Pak ho jen přidáš do deníku.
 
-Jak to funguje: v nastavení doplňku zadáš e-mail a heslo do Kalorických tabulek. Doplněk si uloží jen MD5 hash hesla. Když jídlo poprvé zobrazí, založí ho pod tvým účtem v Kalorických tabulkách jako potravinu, stejně jako „Přidat novou potravinu“ v aplikaci. Kalorické tabulky nové potraviny zpřístupňují všem uživatelům.
+Jak to funguje: v nastavení doplňku zadáš e-mail a heslo do Kalorických tabulek. Doplněk si uloží jen MD5 hash hesla. Po kliknutí jídlo v Kalorických tabulkách vyhledá. Když tam ještě není, založí ho pod tvým účtem jako potravinu, stejně jako „Přidat novou potravinu“ v aplikaci. Kalorické tabulky nové potraviny zpřístupňují všem uživatelům.
 
 Dobré vědět:
 - Jedna porce FF Menu se v aplikaci zadává jako 100 g, protože FF Menu váhu porce neuvádí.

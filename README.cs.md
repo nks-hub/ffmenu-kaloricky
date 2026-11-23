@@ -6,9 +6,10 @@ English version: [README.md](README.md). Projekt nemá nic společného s FF Men
 
 ## Co umí
 
-- U každého jídla na ffmenu.cz/jidelnicek je QR kód, který čtečka v aplikaci Kalorické tabulky otevře jako potravinu.
+- U každého jídla na ffmenu.cz/jidelnicek je tlačítko „Zobrazit QR pro Kalorické tabulky“. Ukáže QR kód, který čtečka v aplikaci Kalorické tabulky otevře jako potravinu.
+- K energii v kJ doplní přepočet na kcal, stejný, jaký počítá aplikace KT.
 - Energii, bílkoviny, sacharidy, tuky, vlákninu a cholesterol čte ze stránky. Nic neodhaduje.
-- Každé jídlo v Kalorických tabulkách založí jen jednou. Když se jídlo v dalším týdnu vrátí, použije stejnou potravinu.
+- Nezakládá duplicity: před založením se zeptá kontroly duplicit v Kalorických tabulkách a použije potravinu FF Menu se stejnými hodnotami, ať ji založil kdokoli.
 - Běží jen v prohlížeči: s Kalorickými tabulkami mluví napřímo a heslo si neukládá, drží jen jeho MD5 hash.
 - Volitelně je tu služba v Pythonu se stránkou pro mobil: přečte štítek z krabičky (OCR) a najde jídlo v jídelníčku. Umí taky zapsat celý den jedním příkazem.
 
@@ -27,9 +28,9 @@ Doplněk načte i Firefox 121 a novější. Část na stránce jídelníčku jse
 
 ## Použití
 
-Otevři [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) a vyber svůj program. Pod každým jídlem se objeví QR kód. V aplikaci Kalorické tabulky klepni na „Čárový kód“, namiř fotoaparát na kód a otevřenou potravinu přidej. Jmenuje se `FF Menu: <jídlo> (<energie porce> kJ)` a jedna porce se zadává jako 100 g, protože FF Menu váhu porce neuvádí. Název, který už v Kalorických tabulkách je, končí u nich chybou, proto dostane opakovaný název čtyřznakovou příponu.
+Otevři [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) a vyber svůj program. Pod každým jídlem je tlačítko „Zobrazit QR pro Kalorické tabulky“, po kliknutí se ukáže QR kód. V aplikaci Kalorické tabulky klepni na „Čárový kód“, namiř fotoaparát na kód a otevřenou potravinu přidej. Jmenuje se `FF Menu: <jídlo> (<energie porce> kJ)` a jedna porce se zadává jako 100 g, protože FF Menu váhu porce neuvádí. Název, který už v Kalorických tabulkách je, končí u nich chybou, proto dostane opakovaný název čtyřznakovou příponu.
 
-Potravinu doplněk založí pod tvým účtem, když jídlo poprvé zobrazí. Kalorické tabulky nové potraviny zpřístupňují všem uživatelům, takže jsou v jejich databázi veřejné.
+Po kliknutí doplněk jídlo v Kalorických tabulkách vyhledá a pod tvým účtem ho založí, jen když tam ještě není. Kalorické tabulky nové potraviny zpřístupňují všem uživatelům, takže jsou v jejich databázi veřejné.
 
 ## Sken štítku a celý den naráz (volitelné)
 
@@ -79,7 +80,7 @@ FFKT_LIVE=1 FFKT_KT_EMAIL=... FFKT_KT_PASSWORD=... python -m unittest discover -
 
 - Rozhraní Kalorických tabulek je neoficiální. Když ho změní, zápis selže a doplněk ukáže chybu, kterou KT vrátily.
 - Potraviny založené doplňkem jsou v databázi Kalorických tabulek veřejné a mají cukry a sůl 0.
-- Kalorické tabulky jednotku porce pojmenují „100 g“, takže jedna porce FF Menu se zadává jako 100 g.
+- Jednotku „porce“ Kalorické tabulky u nové potraviny ignorují (zkoušeno se 100 g i 300 g) a potravinu do schválení moderátorem zamknou, takže jedna porce FF Menu se zadává jako 100 g.
 - Jídelníček na další týden zveřejňuje FF Menu až během týdne. Do té doby pro něj QR kódy nejsou.
 
 ## Licence
