@@ -4,16 +4,15 @@
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest_V3-4285F4?logo=googlechrome&logoColor=white)](extension/manifest.json)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](ffkt)
 
-> Chrome extension that puts a "Do KT" button on every meal of the [ffmenu.cz](https://www.ffmenu.cz/jidelnicek) weekly menu and writes the meal into your [Kalorické tabulky](https://www.kaloricketabulky.cz) diary with the energy and macros from the menu.
+> Chrome extension that shows a QR code next to every meal of the [ffmenu.cz](https://www.ffmenu.cz/jidelnicek) weekly menu. Scanning it with the [Kalorické tabulky](https://www.kaloricketabulky.cz) app opens the meal, with the energy and macros from the menu, ready to be added to your diary.
 
 Česká verze: [README.cs.md](README.cs.md). Not affiliated with FF Menu (BeraTaste s.r.o.) or Kalorické tabulky (Dine4Fit, a.s.).
 
 ## Features
 
-- 🍱 **Button per meal** - "Do KT" on each meal card and "Celý den do KT" (whole day) next to each day on ffmenu.cz/jidelnicek
+- 📱 **QR code per meal** - every meal card on ffmenu.cz/jidelnicek gets a QR code that the barcode scanner of the Kalorické tabulky app opens as a food
 - ⚖️ **Values from the menu** - energy, protein, carbohydrates, fat, fiber and cholesterol are read from the page, nothing is estimated
-- 🕐 **Matching diary slot** - breakfast, morning snack, lunch, afternoon snack and dinner land in the same meal in Kalorické tabulky; the extra protein of the Muscle program goes to second dinner
-- 🔁 **Each meal once** - a meal is written once per day and stays marked green after a reload
+- 🔁 **One food per dish** - the extension creates each dish in Kalorické tabulky once and reuses it when the dish comes back
 - 🔐 **Runs in the browser only** - the extension calls Kalorické tabulky directly and stores the MD5 hash of your password, not the password
 - 📷 **Optional label scanner** - a Python service with a phone page that reads the box label with OCR (Tesseract.js) and matches it to the menu, plus a command that logs a whole day
 
@@ -30,11 +29,13 @@ git clone https://github.com/nks-hub/ffmenu-kaloricky.git
 ```
 
 1. Open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick the `extension` folder.
-2. Click the extension icon, enter your Kalorické tabulky email and password and press "Uložit a ověřit". The status line confirms the login and shows the energy unit (kJ or kcal) set in your account.
+2. Click the extension icon, enter your Kalorické tabulky email and password and press "Uložit a ověřit". The status line confirms the login.
 
 ## Usage
 
-Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Every meal card gets a "Do KT" button and every day a "Celý den do KT" button. A meal goes into the diary for the day it belongs to on the menu, named `FF Menu: <meal>`, at a fixed time for its slot (7:00, 10:00, 12:00, 15:00, 18:00, 20:00). Written meals turn green.
+Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Below every meal a QR code appears. In the Kalorické tabulky app tap "Čárový kód", point the camera at the code and add the food that opens. The food is named `FF Menu: <meal>` and one portion is entered as 100 g, because FF Menu does not publish the weight of a portion.
+
+The extension creates the food under your account the first time it shows the meal. Kalorické tabulky makes new foods available to all its users, so these foods are public in their database.
 
 ## Label scanner and daily import (optional)
 
@@ -57,13 +58,13 @@ schtasks /Create /TN "FF Menu do KT" /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 06:30
 
 ## How it works
 
-Kalorické tabulky has no public API. The extension (`extension/background.js`) and the service (`ffkt/kt.py`) call the legacy XML endpoints on www.dine4fit.com that the Kalorické tabulky Android app 3.14.71 uses:
+Kalorické tabulky has no public API; everything below comes from the Kalorické tabulky Android app 3.14.71.
 
-- `login.api.php` takes the email and the MD5 of the password and returns a session hash,
-- `getInfo.php` returns the energy unit preferred in the account,
-- `addPrijem.php` adds a diary entry typed in by value (`Typ: vlozenaHodnota`), so no food record is created in Kalorické tabulky.
+The scanner of the app treats a QR code that starts with `https://dine4fit.com/food/` (resource `qr_food_prefix`) as a food ID and opens that food. It also knows recipe links, venue links and its own Kochava smart links, and it cannot take nutrition values from a QR code. A meal therefore has to exist in Kalorické tabulky as a food first.
 
-The menu comes from the public HTML of ffmenu.cz/jidelnicek. The same dish has a different portion in each program, so the scanner uses the macros printed on the label to tell programs apart. The QR code on the label only links to the ffmenu.cz home page, which is why the scanner reads the label text.
+The extension (`extension/background.js`) logs in through `login.api.php` (email and MD5 of the password) and creates the food the way the app's "Přidat novou potravinu" does: `POST api/v1/food-suggestion/foodstuff` with the values per 100 g, category 1026 (Hotové pokrmy a polotovary) and the three photos the app requires (package, nutrition table, ingredients). FF Menu boxes have no nutrition table, so the photo is a generated card with the menu values and their source. Sugar and salt are required fields that FF Menu does not publish, so they are sent as 0.
+
+The optional service (`ffkt/kt.py`) writes diary entries directly with `addPrijem.php` (`Typ: vlozenaHodnota`). The same dish has a different portion in each program, so its label scanner uses the macros printed on the label to tell programs apart. The QR code on the box label only links to the ffmenu.cz home page, which is why the scanner reads the label text.
 
 ## Testing
 
@@ -71,21 +72,28 @@ The menu comes from the public HTML of ffmenu.cz/jidelnicek. The same dish has a
 python -m unittest discover -s tests
 ```
 
-Browser tests run the extension on the menu page and the phone page OCR on two real label photos. They need Playwright, Chromium and internet access:
+Browser tests run the extension on the menu page, decode its QR codes from screenshots, and run the phone page OCR on two real label photos. They need Playwright, Chromium, zxing-cpp and internet access:
 
 ```
-pip install playwright
+pip install playwright zxing-cpp pillow
 python -m playwright install chromium
 FFKT_E2E=1 python -m unittest discover -s tests -p test_e2e.py
 ```
 
-Tests never contact Kalorické tabulky. `tests/fake_kt.py` stands in for it, and in browser tests Chromium resolves www.dine4fit.com to that server, which uses the self-signed test certificate in `tests/fixtures/tls`.
+These tests never contact Kalorické tabulky. `tests/fake_kt.py` stands in for it, and in browser tests Chromium resolves www.dine4fit.com to that server, which uses the self-signed test certificate in `tests/fixtures/tls`.
+
+Live tests run the service and the extension against the real Kalorické tabulky and the live ffmenu.cz menu. They write a day of meals into the account, read the entries back through the API the Kalorické tabulky app uses for its diary screen, and delete them again. Use a throwaway account:
+
+```
+FFKT_LIVE=1 FFKT_KT_EMAIL=... FFKT_KT_PASSWORD=... python -m unittest discover -s tests -p test_live.py
+```
 
 ## Limitations
 
 - The Kalorické tabulky API is unofficial. If it changes, writing fails and the extension shows the error returned by Kalorické tabulky.
-- The scanner in the Kalorické tabulky app reads EAN barcodes and Kalorické tabulky's own Kochava links only, so no QR code can add a meal through that app.
-- FF Menu publishes the next week's menu during the week. Until then the extension has no buttons for it.
+- Foods created by the extension are public in the Kalorické tabulky database and show sugar and salt as 0.
+- Kalorické tabulky names the portion unit "100 g", so one FF Menu portion is entered as 100 g.
+- FF Menu publishes the next week's menu during the week. Until then there are no QR codes for it.
 
 ## Contributing
 
