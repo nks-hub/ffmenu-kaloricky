@@ -158,8 +158,9 @@ class LiveExtensionTest(unittest.TestCase):
 
         page = self.context.new_page()
         page.goto(f"https://www.ffmenu.cz/jidelnicek?product_variant_id={PROGRAM}&weeks=0")
-        page.wait_for_selector(".ffkt-qr:is([data-state='done'], [data-state='error'])", timeout=120_000)
         box = page.locator(".ffkt-qr").first
+        box.locator("button").click()
+        page.wait_for_selector(".ffkt-qr:is([data-state='done'], [data-state='error'])", timeout=120_000)
         self.assertEqual(box.get_attribute("data-state"), "done", box.inner_text())
         url = zxingcpp.read_barcodes(Image.open(io.BytesIO(box.locator("svg").screenshot())))[0].text
 

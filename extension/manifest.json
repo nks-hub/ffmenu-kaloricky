@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "FF Menu do Kalorických tabulek",
-  "version": "2.0.2",
-  "description": "Na jídelníčku ffmenu.cz ukáže u každého jídla QR kód, který jídlo otevře v aplikaci Kalorické tabulky.",
+  "version": "2.1.0",
+  "description": "Na jídelníčku ffmenu.cz ukáže na kliknutí QR kód, který jídlo otevře v aplikaci Kalorické tabulky, a doplní kcal k energii v kJ.",
   "permissions": [
     "storage"
   ],

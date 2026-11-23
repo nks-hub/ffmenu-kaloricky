@@ -13,6 +13,8 @@
   color: #555;
 }
 .ffkt-qr[data-state="error"] .ffkt-note { color: #b3261e; }
+.ffkt-qr[data-state="idle"] button { margin-left: 0; padding: 8px 14px; }
+.ffkt-kcal { font-weight: 400; font-size: .8em; color: #666; }
 .ffkt-qr button,
 .ffkt-banner button {
   margin-left: 8px;

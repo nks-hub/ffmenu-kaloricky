@@ -1,6 +1,8 @@
 // Meal keys equal Meal.key in ffkt/ffmenu.py: "<product_variant_id>:<YYYY-MM-DD>:<card index in the day>".
 const MONTHS = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září",
   "října", "listopadu", "prosince"];
+// the factor the KT app converts with, so the page shows the kcal the app will show
+const KJ_PER_KCAL = 4.1871;
 
 const send = (message) => chrome.runtime.sendMessage(message);
 
@@ -65,7 +67,7 @@ function setBox(box, state, text) {
 }
 
 async function fillQr(box, meal) {
-  setBox(box, "busy", "Zakládám jídlo v Kalorických tabulkách…");
+  setBox(box, "busy", "Hledám jídlo v Kalorických tabulkách…");
   const response = await send({ type: "qr", meal });
   if (!response.ok) {
     setBox(box, "error", `Nepodařilo se: ${response.error}`);
@@ -81,25 +83,39 @@ async function fillQr(box, meal) {
   box.insertAdjacentHTML("afterbegin", qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }));
 }
 
+function showKcal(card, kj) {
+  const energy = card.querySelector(".text-large");
+  if (!energy || !Number.isFinite(kj)) return;
+  const kcal = Object.assign(document.createElement("span"), {
+    className: "ffkt-kcal", textContent: ` (${Math.round(kj / KJ_PER_KCAL)} kcal)`,
+  });
+  energy.append(kcal);
+}
+
+// a food is found or created in Kalorické tabulky only for the meals whose QR code is asked for
+function offerQr(box, meal) {
+  box.dataset.state = "idle";
+  const show = Object.assign(document.createElement("button"), {
+    type: "button", textContent: "Zobrazit QR pro Kalorické tabulky",
+  });
+  show.addEventListener("click", () => fillQr(box, meal));
+  box.replaceChildren(show);
+}
+
 async function init() {
   const variant = currentVariant();
   const meals = variant ? mealCards(variant) : [];
   if (!meals.length) return;
 
-  const boxes = meals.map(({ card, key }) => {
+  for (const { card, key, meal } of meals) {
+    showKcal(card, meal.kj);
     const box = Object.assign(document.createElement("div"), { className: "ffkt-qr" });
     box.dataset.key = key;
     card.append(box);
-    return box;
-  });
+    offerQr(box, meal);
+  }
   if (!(await send({ type: "status" })).result) {
     showBanner("nejdřív zadej přihlášení do Kalorických tabulek.");
-    boxes.forEach((box) => setBox(box, "error", "Chybí přihlášení do Kalorických tabulek."));
-    return;
-  }
-  // one after another: each new food is a POST to Kalorické tabulky
-  for (const [i, { meal }] of meals.entries()) {
-    await fillQr(boxes[i], meal);
   }
 }
 

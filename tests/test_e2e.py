@@ -74,12 +74,11 @@ class ExtensionTest(unittest.TestCase):
         page.wait_for_selector(".ffkt-qr")
         return page
 
-    def wait_all_qr(self, page):
-        page.wait_for_function(
-            "document.querySelectorAll('.ffkt-qr').length > 0 && document.querySelectorAll("
-            "'.ffkt-qr:not([data-state=done]):not([data-state=error])').length === 0")
-        errors = page.locator(".ffkt-qr[data-state='error']")
-        self.assertEqual(errors.count(), 0, errors.first.inner_text() if errors.count() else "")
+    def show_qr(self, page, key):
+        box = page.locator(f'.ffkt-qr[data-key="{key}"]')
+        box.locator("button").click()
+        page.wait_for_selector(f'.ffkt-qr[data-key="{key}"]:is([data-state="done"], [data-state="error"])')
+        self.assertEqual(box.get_attribute("data-state"), "done", box.inner_text())
 
     def scan(self, page, key):
         """Decodes the QR code shown for a meal the way a phone camera would."""
@@ -89,38 +88,49 @@ class ExtensionTest(unittest.TestCase):
         image = Image.open(io.BytesIO(page.locator(f'.ffkt-qr[data-key="{key}"] svg').screenshot()))
         return zxingcpp.read_barcodes(image)[0].text
 
-    def test_each_meal_gets_a_qr_that_opens_its_new_kt_food(self):
+    def guid_after_click(self, page, key):
+        self.show_qr(page, key)
+        return self.scan(page, key).rsplit("/", 1)[1]
+
+    def test_qr_appears_after_click_and_opens_its_new_kt_food(self):
         self.assertIn("Přihlášení funguje", self.log_in())
         page = self.open_menu()
-        self.wait_all_qr(page)
+        self.assertEqual(page.locator(".ffkt-qr svg").count(), 0)
+        self.assertEqual(self.kt.foods, {})
 
+        self.show_qr(page, "1:2026-11-23:1")
         url = self.scan(page, "1:2026-11-23:1")
 
         guid = url.rsplit("/", 1)[1]
         self.assertEqual(url, f"https://dine4fit.com/food/{guid}")
-        self.assertEqual(self.kt.foods[guid], {
+        self.assertEqual(self.kt.foods, {guid: {
             "title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)", "foodstuff_type_id": 1026,
             "unit_name": "porce", "unit_multiplier": "100", "foodstuff_unit": "100g",
             "energy": "1345", "energy_unit": "kj", "protein": "20", "carbohydrate": "33", "sugar": "0",
             "fat": "12", "salt": "0", "fiber": "4.8", "cholesterol": "0",
-        })
-        self.assertEqual(page.locator(".ffkt-qr[data-state='done']").count(), 25)
-        self.assertEqual(len(self.kt.foods), 25)
+        }})
         self.assertEqual(len(self.kt.food_images[guid]), 3)
         self.assertIn("100 g = 1 porce", page.locator('.ffkt-qr[data-key="1:2026-11-23:1"]').inner_text())
+        self.assertEqual(page.locator(".ffkt-qr svg").count(), 1)
+
+    def test_kcal_is_shown_next_to_kj(self):
+        page = self.open_menu()
+
+        energy = [" ".join(e.split()) for e in page.locator(".text-large").all_inner_texts()]
+
+        self.assertIn("1 263 kJ (302 kcal)", energy)
+        self.assertIn("1 345 kJ (321 kcal)", energy)
 
     def test_reload_reuses_the_foods_already_created(self):
         self.log_in()
         page = self.open_menu()
-        self.wait_all_qr(page)
-        first = self.scan(page, "1:2026-11-24:2")
+        first = self.guid_after_click(page, "1:2026-11-24:2")
 
         page.reload()
         page.wait_for_selector(".ffkt-qr")
-        self.wait_all_qr(page)
 
-        self.assertEqual(self.scan(page, "1:2026-11-24:2"), first)
-        self.assertEqual(len(self.kt.foods), 25)
+        self.assertEqual(self.guid_after_click(page, "1:2026-11-24:2"), first)
+        self.assertEqual(len(self.kt.foods), 1)
 
     PORRIDGE_VALUES = {"energy": "1345", "energy_unit": "kj", "protein": "20", "carbohydrate": "33", "fat": "12",
                        "fiber": "4.8"}
@@ -128,16 +138,13 @@ class ExtensionTest(unittest.TestCase):
     def qr_guid_with_existing_food(self, title):
         self.kt.foods["a" * 32] = {"title": title, **self.PORRIDGE_VALUES}
         self.log_in()
-        page = self.open_menu()
-        self.wait_all_qr(page)
-        return self.scan(page, "1:2026-11-23:1").rsplit("/", 1)[1]
+        return self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
 
     def test_food_already_in_kt_is_reused_instead_of_created(self):
         guid = self.qr_guid_with_existing_food("FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)")
 
         self.assertEqual(guid, "a" * 32)
-        porridges = [f for f in self.kt.foods.values() if "Ovesná kaše" in f["title"]]
-        self.assertEqual(len(porridges), 1)
+        self.assertEqual(len(self.kt.foods), 1)
 
     def test_food_from_an_older_version_without_energy_in_title_is_reused(self):
         self.assertEqual(self.qr_guid_with_existing_food("FF Menu: Ovesná kaše s proteinem a borůvkami"), "a" * 32)
@@ -148,10 +155,8 @@ class ExtensionTest(unittest.TestCase):
     def test_title_kt_already_has_gets_a_suffix(self):
         self.kt.foods["0" * 32] = {"title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)"}
         self.log_in()
-        page = self.open_menu()
-        self.wait_all_qr(page)
 
-        guid = self.scan(page, "1:2026-11-23:1").rsplit("/", 1)[1]
+        guid = self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
 
         self.assertRegex(self.kt.foods[guid]["title"],
                          r"^FF Menu: Ovesná kaše s proteinem a borůvkami \(1345 kJ\) · [0-9a-f]{4}$")
@@ -160,17 +165,17 @@ class ExtensionTest(unittest.TestCase):
         self.log_in()
         self.kt.hashes.clear()
 
-        self.wait_all_qr(self.open_menu())
+        self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
 
-        self.assertEqual((self.kt.logins, len(self.kt.foods)), (2, 25))
+        self.assertEqual((self.kt.logins, len(self.kt.foods)), (2, 1))
 
     def test_overloaded_kt_api_is_retried(self):
         self.log_in()
         self.kt.unavailable = 2
 
-        self.wait_all_qr(self.open_menu())
+        self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
 
-        self.assertEqual(len(self.kt.foods), 25)
+        self.assertEqual(len(self.kt.foods), 1)
 
     def test_wrong_password_is_reported_in_options(self):
         status = self.log_in(password="spatne")
@@ -183,6 +188,9 @@ class ExtensionTest(unittest.TestCase):
 
         page.wait_for_selector(".ffkt-banner")
         self.assertIn("přihlášení", page.inner_text(".ffkt-banner"))
+        box = page.locator('.ffkt-qr[data-key="1:2026-11-23:1"]')
+        box.locator("button").click()
+        page.wait_for_selector('.ffkt-qr[data-key="1:2026-11-23:1"][data-state="error"]')
         self.assertEqual(self.kt.foods, {})
 
 
