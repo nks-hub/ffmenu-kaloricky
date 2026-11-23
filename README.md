@@ -12,16 +12,16 @@
 
 - 📱 **QR code per meal** - a "Zobrazit QR pro Kalorické tabulky" button on every meal card shows a QR code that the barcode scanner of the Kalorické tabulky app opens as a food
 - 🔥 **kcal next to kJ** - the menu shows the energy in kcal as well, converted the way the Kalorické tabulky app does it
-- ⚖️ **Values from the menu** - energy, protein, carbohydrates, fat, fiber and cholesterol are read from the page, nothing is estimated
-- 🔁 **No duplicates per account** - before creating a food the extension runs the Kalorické tabulky duplicate check and reuses an FF Menu food with the same values that the account already created
-- 🔐 **Runs in the browser only** - the extension calls Kalorické tabulky directly and stores the MD5 hash of your password, not the password
-- 📷 **Optional label scanner** - a Python service with a phone page that reads the box label with OCR (Tesseract.js) and matches it to the menu, plus a command that logs a whole day
+- 🔐 **No login in the extension** - it sends the server only the meal key (program, day, position on the menu) and stores nothing
+- 🔁 **One food per dish** - a small Python server creates the foods under one shared Kalorické tabulky account and reuses them, so everyone scans the same food
+- ⚖️ **Values from the menu** - the server reads energy, protein, carbohydrates, fat, fiber and cholesterol from the ffmenu.cz page itself, nothing is estimated
+- 📷 **Optional label scanner** - a phone page that reads the box label with OCR (Tesseract.js) and matches it to the menu, plus a command that logs a whole day
 
 ## Requirements
 
 - Chrome, Edge or another Chromium browser. Firefox 121+ loads the extension as well; its menu-page part was checked in Firefox 160.
-- A Kalorické tabulky account that signs in with email and password.
-- For the optional scanner: Python 3.12, no third-party packages.
+- For your own server: Docker, or Python 3.12 with Pillow, and a Kalorické tabulky account that signs in with email and password.
+- For the optional label scanner alone: Python 3.12, no third-party packages.
 
 ## Installation
 
@@ -35,15 +35,35 @@ python tools/build_extension.py   # writes dist/ffmenu-kt-<version>.zip
 
 1. Unzip `dist/ffmenu-kt-<version>.zip` into a folder you keep (Chrome loads the extension from it on every start).
 2. Open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick that folder.
-3. Click the extension icon, enter your Kalorické tabulky email and password and press "Uložit a ověřit". The status line confirms the login.
+
+For a new version, unzip it over the same folder and press the reload arrow of the extension in `chrome://extensions`.
 
 The same zip is the upload for the Chrome Web Store; the listing texts, privacy answers and graphics are in [store/listing.md](store/listing.md).
 
 ## Usage
 
-Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Below every meal there is a "Zobrazit QR pro Kalorické tabulky" button; clicking it shows the QR code. In the Kalorické tabulky app tap "Čárový kód", point the camera at the code and add the food that opens. The food is named `FF Menu: <meal> (<portion energy> kJ)` and one portion is entered as 100 g, because FF Menu does not publish the weight of a portion. Kalorické tabulky fails with an error on a title it already has, so a repeated title gets a four-character suffix.
+Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Below every meal there is a "Zobrazit QR pro Kalorické tabulky" button; clicking it shows the QR code. In the Kalorické tabulky app tap "Čárový kód", point the camera at the code and add the food that opens. The food is named `FF Menu: <meal> (<portion energy> kJ)` and one portion is entered as 100 g, because FF Menu does not publish the weight of a portion.
 
-When you click, the extension looks for the meal in Kalorické tabulky and creates it under your account only if it is not there yet. Kalorické tabulky makes new foods available to all its users, so these foods are public in their database.
+When you click, the extension asks the server at `https://ffkt.nks-hub.cz`. The server reads the meal from the menu, looks for it in Kalorické tabulky and creates it under its account only if it is not there yet. Kalorické tabulky makes new foods available to all its users, so these foods are public in their database.
+
+## Server
+
+`python -m ffkt serve` answers `GET /api/food?key=<program>:<YYYY-MM-DD>:<position>` with the QR link of the meal. The route needs no token; it only accepts meals of the menu weeks ffmenu.cz shows (last, this and next week). The diary routes of the label scanner need the token.
+
+To run it with Docker, put the account into `.env` next to `docker-compose.yml`:
+
+```
+FFKT_KT_EMAIL=you@example.com
+FFKT_KT_PASSWORD=...
+FFKT_TOKEN=...        # optional; without it the diary routes get a random token, printed in the log
+FFKT_PORT=8077        # optional
+```
+
+```
+docker compose up -d --build
+```
+
+The extension needs HTTPS, so put the server behind a reverse proxy with a certificate and change `SERVER_URL` in `extension/background.js` and `host_permissions` in `extension/manifest.json` to its address. Created foods are kept in `data/foods.json` (the `ffkt-data` volume), so the server asks Kalorické tabulky about a dish only once.
 
 ## Label scanner and daily import (optional)
 
@@ -70,9 +90,9 @@ Kalorické tabulky has no public API; everything below comes from the Kalorické
 
 The scanner of the app treats a QR code that starts with `https://dine4fit.com/food/` (resource `qr_food_prefix`) as a food ID and opens that food. It also knows recipe links, venue links and its own Kochava smart links, and it cannot take nutrition values from a QR code. A meal therefore has to exist in Kalorické tabulky as a food first.
 
-The extension (`extension/background.js`) logs in through `login.api.php` (email and MD5 of the password) and creates the food the way the app's "Přidat novou potravinu" does: `POST api/v1/food-suggestion/foodstuff` with the values per 100 g, category 1026 (Hotové pokrmy a polotovary) and the three photos the app requires (package, nutrition table, ingredients). FF Menu boxes have no nutrition table, so the photo is a generated card with the menu values and their source. Sugar and salt are required fields that FF Menu does not publish, so they are sent as 0.
+The server (`ffkt/app.py`, `ffkt/kt.py`) logs in through `login.api.php` (email and MD5 of the password) and first runs the duplicate check of the app, `POST api/v1/food-suggestion/search/duplicates`, with the values per 100 g. That check sees only the foods of the logged-in account, which is why one shared account avoids a copy of each dish per user. For a dish the account does not have yet, it creates the food the way the app's "Přidat novou potravinu" does: `POST api/v1/food-suggestion/foodstuff` with the values per 100 g, category 1026 (Hotové pokrmy a polotovary) and the three photos the app requires (package, nutrition table, ingredients). FF Menu boxes have no nutrition table, so the photo is a generated card with the menu values and their source. Sugar and salt are required fields that FF Menu does not publish, so they are sent as 0.
 
-The optional service (`ffkt/kt.py`) writes diary entries directly with `addPrijem.php` (`Typ: vlozenaHodnota`). The same dish has a different portion in each program, so its label scanner uses the macros printed on the label to tell programs apart. The QR code on the box label only links to the ffmenu.cz home page, which is why the scanner reads the label text.
+The label scanner writes diary entries directly with `addPrijem.php` (`Typ: vlozenaHodnota`). The same dish has a different portion in each program, so the scanner uses the macros printed on the label to tell programs apart. The QR code on the box label only links to the ffmenu.cz home page, which is why the scanner reads the label text.
 
 ## Testing
 
@@ -80,7 +100,7 @@ The optional service (`ffkt/kt.py`) writes diary entries directly with `addPrije
 python -m unittest discover -s tests
 ```
 
-Browser tests run the extension on the menu page, decode its QR codes from screenshots, and run the phone page OCR on two real label photos. They need Playwright, Chromium, zxing-cpp and internet access:
+Browser tests run the extension on the menu page, decode its QR codes from screenshots, and run the phone page OCR on two real label photos. They need Playwright, Chromium, zxing-cpp, Pillow and internet access:
 
 ```
 pip install playwright zxing-cpp pillow
@@ -88,9 +108,9 @@ python -m playwright install chromium
 FFKT_E2E=1 python -m unittest discover -s tests -p test_e2e.py
 ```
 
-These tests never contact Kalorické tabulky. `tests/fake_kt.py` stands in for it, and in browser tests Chromium resolves www.dine4fit.com to that server, which uses the self-signed test certificate in `tests/fixtures/tls`.
+These tests never contact Kalorické tabulky. `tests/fake_kt.py` stands in for it, and in browser tests Chromium resolves ffkt.nks-hub.cz to a local server that uses the self-signed test certificate in `tests/fixtures/tls`.
 
-Live tests run the service and the extension against the real Kalorické tabulky and the live ffmenu.cz menu. They write a day of meals into the account, read the entries back through the API the Kalorické tabulky app uses for its diary screen, and delete them again. Use a throwaway account:
+Live tests run the server and the extension against the real Kalorické tabulky and the live ffmenu.cz menu. They write a day of meals into the account, read the entries back through the API the Kalorické tabulky app uses for its diary screen, and delete them again. Use a throwaway account:
 
 ```
 FFKT_LIVE=1 FFKT_KT_EMAIL=... FFKT_KT_PASSWORD=... python -m unittest discover -s tests -p test_live.py
@@ -98,9 +118,10 @@ FFKT_LIVE=1 FFKT_KT_EMAIL=... FFKT_KT_PASSWORD=... python -m unittest discover -
 
 ## Limitations
 
-- The duplicate check only sees foods of the logged-in Kalorické tabulky account, so people using the extension with their own accounts each create their own copy of a dish.
-- The Kalorické tabulky API is unofficial. If it changes, writing fails and the extension shows the error returned by Kalorické tabulky.
-- Foods created by the extension are public in the Kalorické tabulky database and show sugar and salt as 0.
+- The extension works only while the server is up. Without it the meal card shows "server doplňku není dostupný".
+- Foods the server creates wait for approval by Kalorické tabulky. Until then other accounts cannot find them in search, only open them from the QR code.
+- The Kalorické tabulky API is unofficial. If it changes, creating foods fails and the extension shows the error returned by Kalorické tabulky.
+- Foods are public in the Kalorické tabulky database and show sugar and salt as 0.
 - Kalorické tabulky ignores the portion unit of a new food (tried with "porce" at 100 g and 300 g) and keeps the food locked until its moderators approve it, so one FF Menu portion is entered as 100 g.
 - FF Menu publishes the next week's menu during the week. Until then there are no QR codes for it.
 

@@ -12,7 +12,7 @@ Texts and answers for the developer dashboard. Upload `dist/ffmenu-kt-<version>.
 
 Na jídelníčku ffmenu.cz přidá ke každému jídlu tlačítko „Zobrazit QR pro Kalorické tabulky“ a k energii v kJ přepočet na kcal. V aplikaci Kalorické tabulky klepneš na „Čárový kód“, namíříš fotoaparát na kód a otevře se jídlo s energií, bílkovinami, sacharidy, tuky, vlákninou a cholesterolem z jídelníčku. Pak ho jen přidáš do deníku.
 
-Jak to funguje: v nastavení doplňku zadáš e-mail a heslo do Kalorických tabulek. Doplněk si uloží jen MD5 hash hesla. Po kliknutí jídlo v Kalorických tabulkách vyhledá. Když tam ještě není, založí ho pod tvým účtem jako potravinu, stejně jako „Přidat novou potravinu“ v aplikaci. Kalorické tabulky nové potraviny zpřístupňují všem uživatelům.
+Jak to funguje: doplněk nechce žádné přihlášení. Po kliknutí pošle serveru doplňku, o které jídlo jde. Server si hodnoty přečte z jídelníčku ffmenu.cz a v Kalorických tabulkách jídlo vyhledá. Když tam ještě není, založí ho jako potravinu, stejně jako „Přidat novou potravinu“ v aplikaci. Kalorické tabulky nové potraviny zpřístupňují všem uživatelům.
 
 Dobré vědět:
 - Jedna porce FF Menu se v aplikaci zadává jako 100 g, protože FF Menu váhu porce neuvádí.
@@ -23,19 +23,18 @@ Dobré vědět:
 
 **Language:** Czech
 
-**Graphics:** store icon `extension/icons/icon-128.png`, screenshots `store/screenshot-1-menu.png` and `store/screenshot-2-options.png` (1280×800), small promo tile `store/promo-440x280.png`.
+**Graphics:** store icon `extension/icons/icon-128.png`, screenshot `store/screenshot-1-menu.png` (1280×800), small promo tile `store/promo-440x280.png`.
 
 ## Privacy tab
 
 **Single purpose:** Shows a QR code for each meal on the ffmenu.cz menu; the Kalorické tabulky app opens the meal from that code.
 
 **Permission justifications:**
-- `storage` - keeps the Kalorické tabulky email, the MD5 hash of the password, the session hash and the IDs of foods already created, so a dish is created only once.
-- Host `https://www.dine4fit.com/*` - the Kalorické tabulky API: logging in and creating the meal as a food.
-- Content script on `https://www.ffmenu.cz/jidelnicek*` - reads the meal values from the menu page and shows the QR codes.
+- Host `https://ffkt.nks-hub.cz/*` - the extension's server, which finds or creates the Kalorické tabulky food of a meal and returns its link for the QR code.
+- Content script on `https://www.ffmenu.cz/jidelnicek*` - adds the QR buttons and the kcal values to the menu page.
 
 **Remote code:** No. The QR code library (`lib/qrcode.js`, MIT) is bundled.
 
-**Data usage:** Authentication information (email and password hash for Kalorické tabulky). It stays in the browser and is sent only to Kalorické tabulky. It is not sold, not transferred to third parties and not used for anything else than the single purpose.
+**Data usage:** None of the listed categories. The extension sends only the meal key (program, date, position on the menu) and stores nothing.
 
 **Privacy policy URL:** https://github.com/nks-hub/ffmenu-kaloricky/blob/main/PRIVACY.md
