@@ -131,6 +131,106 @@ class ServiceApiTest(AppTest):
         self.assertIn("<title>", text)
 
 
+PORRIDGE_KEY = "1:2026-11-23:1"
+PORRIDGE_VALUES = {"energy": "1345", "energy_unit": "kj", "protein": "20", "carbohydrate": "33", "fat": "12",
+                   "fiber": "4.8"}
+
+
+class FoodApiTest(AppTest):
+    def food(self, key=PORRIDGE_KEY):
+        status, data = self.json(f"/api/food?key={key}")
+        self.assertEqual(status, 200, data)
+        prefix = "https://dine4fit.com/food/"
+        self.assertTrue(data["url"].startswith(prefix), data)
+        return data["url"][len(prefix):]
+
+    def test_meal_is_created_as_kt_food_with_menu_values(self):
+        guid = self.food()
+
+        self.assertEqual(self.kt.foods, {guid: {
+            "title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)", "foodstuff_type_id": 1026,
+            "unit_name": "porce", "unit_multiplier": "100", "foodstuff_unit": "100g",
+            **PORRIDGE_VALUES, "sugar": "0", "salt": "0", "cholesterol": "0",
+        }})
+        self.assertEqual(len(self.kt.food_images[guid]), 3)
+
+    def test_second_request_reuses_the_food(self):
+        first = self.food()
+
+        self.assertEqual(self.food(), first)
+        self.assertEqual(len(self.kt.foods), 1)
+
+    def test_restarted_service_reuses_the_food_without_asking_kt(self):
+        first = self.food()
+        logins = self.kt.logins
+        restarted = Service(self.service.kt.__class__(self.kt.email, "x", base_url=self.kt.url), program=1,
+                            store_path=self.service.store_path, fetch=fixture_fetch,
+                            today=lambda: date(2026, 11, 23))
+
+        self.assertEqual(restarted.food(restarted.find(PORRIDGE_KEY)), first)
+        self.assertEqual(self.kt.logins, logins)
+
+    def food_with_existing(self, title):
+        self.kt.foods["a" * 32] = {"title": title, **PORRIDGE_VALUES}
+        return self.food()
+
+    def test_food_kt_already_has_is_reused(self):
+        self.assertEqual(self.food_with_existing("FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)"), "a" * 32)
+        self.assertEqual(len(self.kt.foods), 1)
+
+    def test_food_from_an_older_version_without_energy_in_title_is_reused(self):
+        self.assertEqual(self.food_with_existing("FF Menu: Ovesná kaše s proteinem a borůvkami"), "a" * 32)
+
+    def test_other_food_with_the_same_values_is_not_reused(self):
+        self.assertNotEqual(self.food_with_existing("Ovesná kaše domácí"), "a" * 32)
+
+    def test_title_kt_already_has_gets_a_suffix(self):
+        self.kt.foods["0" * 32] = {"title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)"}
+
+        guid = self.food()
+
+        self.assertRegex(self.kt.foods[guid]["title"],
+                         r"^FF Menu: Ovesná kaše s proteinem a borůvkami \(1345 kJ\) · [0-9a-f]{4}$")
+
+    def test_expired_kt_session_logs_in_again(self):
+        self.food("1:2026-11-23:0")
+        self.kt.hashes.clear()
+
+        self.food()
+
+        self.assertEqual((self.kt.logins, len(self.kt.foods)), (2, 2))
+
+    def test_overloaded_kt_is_retried(self):
+        self.service.kt.retry_delays = (0, 0)
+        self.kt.unavailable = 2
+
+        self.food()
+
+        self.assertEqual(len(self.kt.foods), 1)
+
+    def test_kt_failure_is_reported_and_not_remembered(self):
+        self.service.kt.retry_delays = (0, 0)
+        self.kt.unavailable = 3
+
+        status, data = self.json(f"/api/food?key={PORRIDGE_KEY}")
+
+        self.assertEqual(status, 502, data)
+        self.assertEqual(self.kt.foods, {})
+        self.food()
+        self.assertEqual(len(self.kt.foods), 1)
+
+    def test_meal_outside_the_menu_gets_404(self):
+        for key in ("1:2026-11-23:9", "1:2026-11-30:0", "1:2027-01-04:0"):
+            with self.subTest(key):
+                self.assertEqual(self.json(f"/api/food?key={key}")[0], 404)
+        self.assertEqual(self.kt.foods, {})
+
+    def test_malformed_key_gets_400(self):
+        for key in ("", "x", "1:2026-13-45:0", "4:2026-11-23:0"):
+            with self.subTest(key):
+                self.assertEqual(self.json(f"/api/food?key={key}")[0], 400)
+
+
 class TokenTest(AppTest):
     token = "s3cret"
 
@@ -140,6 +240,9 @@ class TokenTest(AppTest):
 
     def test_page_itself_loads_without_token(self):
         self.assertEqual(self.call("/")[0], 200)
+
+    def test_food_for_the_browser_extension_needs_no_token(self):
+        self.assertEqual(self.call(f"/api/food?key={PORRIDGE_KEY}")[0], 200)
 
 
 if __name__ == "__main__":

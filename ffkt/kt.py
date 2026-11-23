@@ -1,6 +1,7 @@
-"""Client for the legacy XML API of Kalorické tabulky (www.dine4fit.com), as called by KT Android 3.14.71."""
+"""Client for the APIs of Kalorické tabulky (www.dine4fit.com), as called by KT Android 3.14.71."""
 import json
 import time
+import uuid
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -35,22 +36,23 @@ class KTClient:
         self._unit = None
         self.retry_delays = RETRY_DELAYS
 
-    def _request(self, path, params, body=None):
-        query = urllib.parse.urlencode({**params, **APP_PARAMS})
-        request = urllib.request.Request(
-            f"{self.base_url}{path}?{query}",
-            data=None if body is None else json.dumps(body, ensure_ascii=False).encode(),
-            headers={"Content-Type": "application/json; charset=UTF-8", "User-Agent": "okhttp/4.12.0"},
-        )
+    def _open(self, request):
         for delay in (*self.retry_delays, None):
             try:
                 with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                    root = ET.fromstring(response.read())
-                break
+                    return response.read()
             except urllib.error.HTTPError as error:
                 if error.code != 503 or delay is None:
                     raise
                 time.sleep(delay)
+
+    def _request(self, path, params, body=None):
+        query = urllib.parse.urlencode({**params, **APP_PARAMS})
+        root = ET.fromstring(self._open(urllib.request.Request(
+            f"{self.base_url}{path}?{query}",
+            data=None if body is None else json.dumps(body, ensure_ascii=False).encode(),
+            headers={"Content-Type": "application/json; charset=UTF-8", "User-Agent": "okhttp/4.12.0"},
+        )))
         if root.tag == "result":
             code = int(root.findtext("code", "0"))
             if not 200 <= code < 300:
@@ -99,3 +101,45 @@ class KTClient:
                 "Cholesterol": cholesterol,
             }],
         })
+
+    def _api(self, path, body, content_type="application/json"):
+        """JSON API of the app (www.dine4fit.com/api), signed in with the hash of the legacy login."""
+        if self.hash is None:
+            self.login()
+        for relogin in (True, False):
+            request = urllib.request.Request(f"{self.base_url}api/{path}", data=body, headers={
+                "hash": self.hash, "version": APP_PARAMS["v"], "pid": APP_PARAMS["pid"], "lang": "cs",
+                "Content-Type": content_type, "User-Agent": "okhttp/4.12.0"})
+            try:
+                return json.loads(self._open(request))
+            except urllib.error.HTTPError as error:
+                if error.code == 401 and relogin:
+                    self.login()
+                    continue
+                try:
+                    data = json.loads(error.read())
+                except ValueError:
+                    data = {}
+                raise KTError(error.code, data.get("error") or data.get("message") or error.reason) from None
+
+    def duplicates(self, values):
+        """Foods of this account that have these values per 100 g, pending ones included."""
+        return self._api("v1/food-suggestion/search/duplicates", json.dumps(values).encode())["items"]
+
+    def create_food(self, data, photo):
+        """Suggests a new public food like "Přidat novou potravinu" in the app and returns its GUID."""
+        # "data" goes without a filename and KT wants exactly three photos (package, nutrition table,
+        # ingredients); it answered 400 to one photo or to empty ones
+        boundary = uuid.uuid4().hex
+        body = (f'--{boundary}\r\nContent-Disposition: form-data; name="data"\r\n'
+                "Content-Type: application/json; charset=utf-8\r\n\r\n").encode()
+        body += json.dumps(data, ensure_ascii=False).encode()
+        for n in (1, 2, 3):
+            body += (f'\r\n--{boundary}\r\nContent-Disposition: form-data; name="images"; '
+                     f'filename="ffmenu-{n}.jpg"\r\nContent-Type: image/jpeg\r\n\r\n').encode() + photo
+        body += f"\r\n--{boundary}--\r\n".encode()
+        guid = self._api("v1/food-suggestion/foodstuff?force=true", body,
+                         f"multipart/form-data; boundary={boundary}").get("foodstuff_guid")
+        if not guid:
+            raise KTError(0, "Kalorické tabulky nevrátily ID nové potraviny")
+        return guid

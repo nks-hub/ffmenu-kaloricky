@@ -18,8 +18,7 @@ class BuildExtensionTest(unittest.TestCase):
 
     def test_every_file_the_manifest_names_is_in_the_zip(self):
         m = self.manifest
-        referenced = {m["background"]["service_worker"], *m["background"]["scripts"], m["options_ui"]["page"],
-                      *m["icons"].values(), *m["action"]["default_icon"].values(),
+        referenced = {m["background"]["service_worker"], *m["background"]["scripts"], *m["icons"].values(),
                       *(f for script in m["content_scripts"] for f in script["js"] + script["css"])}
 
         self.assertEqual(referenced - self.names, set())

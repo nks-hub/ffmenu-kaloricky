@@ -3,15 +3,18 @@ import argparse
 import getpass
 import hashlib
 import hmac
+import io
 import json
 import os
 import re
 import secrets
 import socket
 import sys
+import textwrap
 import threading
 import time
 import urllib.error
+import uuid
 from datetime import date, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -29,6 +32,10 @@ SLOT_TIMES = {1: "07:00", 2: "10:00", 3: "12:00", 4: "15:00", 5: "18:00", 6: "20
 KEY = re.compile(r"(\d+):(\d{4}-\d\d-\d\d):(\d+)")
 MENU_TTL = 3600
 MAX_BODY = 64_000
+# the KT scanner opens the food detail for QR codes starting with this (string qr_food_prefix in the app)
+QR_FOOD_PREFIX = "https://dine4fit.com/food/"
+# "Jídla a přílohy / Hotové pokrmy a polotovary" in GET api/v2/food-suggestion/category/list
+READY_MEALS_CATEGORY = 1026
 
 
 class AlreadyAdded(Exception):
@@ -48,6 +55,8 @@ class Service:
         self.today = today
         self._menus = {}
         self._lock = threading.Lock()
+        self._food_lock = threading.Lock()
+        self.foods_path = self.store_path.with_name("foods.json")
 
     def meals(self, variant, weeks):
         cached = self._menus.get((variant, weeks))
@@ -78,10 +87,20 @@ class Service:
         meals = [m for variant in PROGRAMS for weeks in (0, -1) for m in self.meals(variant, weeks)]
         return rank(text, meals, preferred=self.program)[:5]
 
+    @staticmethod
+    def _read(path, empty):
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else empty
+
+    @staticmethod
+    def _write(path, data):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # write-then-rename so a crash cannot leave a half-written file that loses earlier entries
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+        os.replace(tmp, path)
+
     def _records(self):
-        if not self.store_path.exists():
-            return []
-        return json.loads(self.store_path.read_text(encoding="utf-8"))
+        return self._read(self.store_path, [])
 
     def added_keys(self, diary_day):
         return {r["key"] for r in self._records() if r["date"] == diary_day.isoformat()}
@@ -97,11 +116,42 @@ class Service:
                                cholesterol=meal.cholesterol)
             records.append({"date": diary_day.isoformat(), "key": meal.key, "name": meal.name,
                             "added": datetime.now().isoformat(timespec="seconds")})
-            self.store_path.parent.mkdir(parents=True, exist_ok=True)
-            # write-then-rename so a crash cannot leave a half-written log that loses earlier entries
-            tmp = self.store_path.with_suffix(".tmp")
-            tmp.write_text(json.dumps(records, ensure_ascii=False, indent=1), encoding="utf-8")
-            os.replace(tmp, self.store_path)
+            self._write(self.store_path, records)
+
+    def food(self, meal):
+        """GUID of the KT food for a menu meal: the one this account already has, or a new one."""
+        values = food_values(meal)
+        # the same dish comes back in later weeks and other programs with the same values
+        cache_key = hashlib.md5(json.dumps([meal.name, values, meal.cholesterol]).encode()).hexdigest()
+        # one at a time, so two visitors asking for a new dish together cannot create it twice
+        with self._food_lock:
+            foods = self._read(self.foods_path, {})
+            if cache_key not in foods:
+                foods[cache_key] = self._find_food(meal, values) or self._create_food(meal, values)
+                self._write(self.foods_path, foods)
+            return foods[cache_key]
+
+    def _find_food(self, meal, values):
+        name = f"FF Menu: {meal.name}"
+        ours = [item for item in self.kt.duplicates(values)
+                if item["title"] == name or item["title"].startswith(f"{name} (")]
+        exact = [item for item in ours if item["title"] == food_title(meal)]
+        return (exact or ours or [{}])[0].get("id")
+
+    def _create_food(self, meal, values):
+        # KT ignores the unit on creation (it keeps "100 g") and requires category, sugar and salt;
+        # FF Menu publishes neither sugar nor salt, so they are 0
+        data = {**values, "title": food_title(meal), "foodstuff_type_id": READY_MEALS_CATEGORY,
+                "unit_name": "porce", "unit_multiplier": "100", "foodstuff_unit": "100g",
+                "sugar": "0", "salt": "0", "cholesterol": f"{meal.cholesterol:g}"}
+        photo = source_card(meal)
+        try:
+            return self.kt.create_food(data, photo)
+        except KTError as error:
+            # KT answers 500 for a title it already has; with other values the duplicate check misses it
+            if error.code != 500:
+                raise
+            return self.kt.create_food({**data, "title": f"{data['title']} · {uuid.uuid4().hex[:4]}"}, photo)
 
     def add_day(self, day, variant=None, diary_day=None):
         added, skipped = [], []
@@ -112,6 +162,49 @@ class Service:
             except AlreadyAdded:
                 skipped.append(meal)
         return added, skipped
+
+
+def food_values(meal):
+    """Values of one FF Menu portion, declared as 100 g because the menu gives no portion weight."""
+    return {"energy": f"{meal.kj:g}", "energy_unit": "kj", "protein": f"{meal.protein:g}",
+            "carbohydrate": f"{meal.carbs:g}", "fat": f"{meal.fat:g}", "fiber": f"{meal.fiber:g}"}
+
+
+def food_title(meal):
+    return f"FF Menu: {meal.name} ({meal.kj:g} kJ)"
+
+
+def _font(size):
+    from PIL import ImageFont
+    # DejaVu Sans in the Docker image (fonts-dejavu-core), Arial on Windows; the Pillow default font
+    # has no Czech letters
+    for name in ("DejaVuSans.ttf", "arial.ttf"):
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            continue
+    raise RuntimeError("chybí písmo DejaVu Sans nebo Arial")
+
+
+def source_card(meal):
+    """JPEG with the menu values and their source; KT takes a new food only with photos."""
+    from PIL import Image, ImageDraw
+    image = Image.new("RGB", (900, 560), "white")
+    draw = ImageDraw.Draw(image)
+    y = 30
+    for line in textwrap.wrap(f"FF Menu: {meal.name}", 44):
+        draw.text((30, y), line, fill="#111", font=_font(34))
+        y += 44
+    for line in (f"1 porce: {meal.kj:g} kJ ({round(meal.kj / KJ_PER_KCAL)} kcal)",
+                 f"Bílkoviny {meal.protein:g} g, Sacharidy {meal.carbs:g} g, Tuky {meal.fat:g} g",
+                 f"Vláknina {meal.fiber:g} g, Cholesterol {meal.cholesterol:g} mg",
+                 "Cukry a sůl FF Menu neuvádí.",
+                 f"Zdroj: www.ffmenu.cz/jidelnicek, {meal.program}, {meal.day:%d. %m. %Y}"):
+        y += 56
+        draw.text((30, y), line, fill="#111", font=_font(28))
+    out = io.BytesIO()
+    image.save(out, "JPEG", quality=90)
+    return out.getvalue()
 
 
 def meal_json(meal, **extra):
@@ -177,7 +270,9 @@ def make_server(service, host, port, token=None):
         def _api(self, url, raw):
             if not url.path.startswith("/api/"):
                 return self._json(404, {"error": "nenalezeno"})
-            if token and not hmac.compare_digest(self.headers.get("X-Token", ""), token):
+            # the browser extension asks for foods without a token; it can only get meals of the menu
+            if token and url.path != "/api/food" and not hmac.compare_digest(
+                    self.headers.get("X-Token", ""), token):
                 return self._json(403, {"error": "chybí nebo nesedí přístupový token"})
             try:
                 body = None
@@ -205,6 +300,19 @@ def make_server(service, host, port, token=None):
             added = service.added_keys(diary)
             meals = [meal_json(m, added=m.key in added) for m in service.day_menu(day, variant)]
             return 200, {"date": day.isoformat(), "program": variant, "programs": PROGRAMS, "meals": meals}
+        if path == "/api/food" and body is None:
+            match = KEY.fullmatch(query.get("key", ""))
+            if not match:
+                raise BadRequest(f"neplatný klíč jídla: {query.get('key')!r}")
+            _variant(match[1], None)
+            # only the weeks ffmenu.cz shows, so a request cannot make the server fetch any week
+            if abs(week_offset(_date(match[2]), service.today())) > 1:
+                return 404, {"error": "jídlo v jídelníčku není"}
+            try:
+                meal = service.find(match[0])
+            except KeyError:
+                return 404, {"error": "jídlo v jídelníčku není"}
+            return 200, {"url": QR_FOOD_PREFIX + service.food(meal)}
         if path == "/api/pair" and body is None:
             fragment = f"#t={token}" if token else ""
             return 200, {"url": f"http://{lan_address()}:{server.server_port}/{fragment}"}
@@ -242,9 +350,15 @@ def make_server(service, host, port, token=None):
 
 
 def load_config():
-    if not CONFIG.exists():
-        sys.exit(f"Chybí {CONFIG.name}. Spusť nejdřív: python -m ffkt setup")
-    return json.loads(CONFIG.read_text(encoding="utf-8"))
+    if CONFIG.exists():
+        return json.loads(CONFIG.read_text(encoding="utf-8"))
+    # Docker: the account comes from the environment; a missing token is random, so the diary stays closed
+    if os.environ.get("FFKT_KT_EMAIL"):
+        return {"kt_email": os.environ["FFKT_KT_EMAIL"],
+                "kt_password_md5": hashlib.md5(os.environ["FFKT_KT_PASSWORD"].encode()).hexdigest(),
+                "program": int(os.environ.get("FFKT_PROGRAM", 1)),
+                "token": os.environ.get("FFKT_TOKEN") or secrets.token_urlsafe(16)}
+    sys.exit(f"Chybí {CONFIG.name}. Spusť nejdřív: python -m ffkt setup")
 
 
 def service_from_config(config):

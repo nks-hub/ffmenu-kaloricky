@@ -15,8 +15,7 @@
 .ffkt-qr[data-state="error"] .ffkt-note { color: #b3261e; }
 .ffkt-qr[data-state="idle"] button { margin-left: 0; padding: 8px 14px; }
 .ffkt-kcal { font-weight: 400; font-size: .8em; color: #666; }
-.ffkt-qr button,
-.ffkt-banner button {
+.ffkt-qr button {
   margin-left: 8px;
   padding: 4px 10px;
   border: 0;
@@ -26,13 +25,3 @@
   font-weight: 600;
   cursor: pointer;
 }
-.ffkt-banner {
-  margin: 0 auto 16px;
-  max-width: 720px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #fbe9e7;
-  color: #b3261e;
-  text-align: center;
-}
-.ffkt-banner button { background: #b3261e; }

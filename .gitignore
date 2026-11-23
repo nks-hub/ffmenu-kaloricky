@@ -4,6 +4,7 @@ config.local.json
 data/
 node_modules/
 dist/
+.env
 
 # Editor/IDE local configs
 .[a-z]*/

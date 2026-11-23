@@ -1,0 +1,8 @@
+.git
+dist
+data
+tests
+store
+extension
+.env
+config.local.json

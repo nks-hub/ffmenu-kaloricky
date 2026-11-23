@@ -1,0 +1,15 @@
+services:
+  ffkt:
+    build: .
+    restart: unless-stopped
+    environment:
+      FFKT_KT_EMAIL: ${FFKT_KT_EMAIL:?set FFKT_KT_EMAIL in .env}
+      FFKT_KT_PASSWORD: ${FFKT_KT_PASSWORD:?set FFKT_KT_PASSWORD in .env}
+      FFKT_TOKEN: ${FFKT_TOKEN:-}
+    ports:
+      - "${FFKT_PORT:-8077}:8077"
+    volumes:
+      - ffkt-data:/app/data
+
+volumes:
+  ffkt-data:

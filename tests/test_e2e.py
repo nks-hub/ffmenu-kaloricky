@@ -2,14 +2,20 @@
 
 Run with: FFKT_E2E=1 python -m unittest discover -s tests -p test_e2e.py
 """
+import hashlib
 import importlib.util
 import os
+import ssl
 import tempfile
+import threading
 import unittest
+from datetime import date
 from pathlib import Path
 
-from fake_kt import FakeKT
-from test_app import FIXTURES, AppTest
+from fake_kt import TLS, FakeKT
+from ffkt.app import Service, make_server
+from ffkt.kt import KTClient
+from test_app import FIXTURES, AppTest, fixture_fetch
 
 ROOT = Path(__file__).resolve().parent.parent
 ENABLED = os.environ.get("FFKT_E2E") == "1" and importlib.util.find_spec("playwright") is not None
@@ -32,20 +38,31 @@ def tearDownModule():
 
 @unittest.skipUnless(ENABLED, SKIP)
 class ExtensionTest(unittest.TestCase):
-    """The extension talks to https://www.dine4fit.com itself; Chromium resolves that host to FakeKT."""
+    """The extension asks https://ffkt.nks-hub.cz; Chromium resolves that host to a local ffkt server on FakeKT."""
 
     def setUp(self):
-        self.kt = FakeKT(tls=True)
+        self.kt = FakeKT()
         self.addCleanup(self.kt.close)
+        client = KTClient(self.kt.email, hashlib.md5(b"tajne heslo").hexdigest(), base_url=self.kt.url)
+        client.retry_delays = (0, 0)
+        service = Service(client, program=1, store_path=Path(tempfile.mkdtemp()) / "added.json",
+                          fetch=fixture_fetch, today=lambda: date(2026, 11, 23))
+        self.server = make_server(service, "127.0.0.1", 0, token="e2e")
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(TLS / "cert.pem", TLS / "key.pem")
+        self.server.socket = context.wrap_socket(self.server.socket, server_side=True, do_handshake_on_connect=False)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.addCleanup(self.server.server_close)
+        self.addCleanup(self.server.shutdown)
         extension = str(ROOT / "extension")
         self.context = playwright.chromium.launch_persistent_context(
             tempfile.mkdtemp(), channel="chromium", ignore_https_errors=True,
             args=[f"--disable-extensions-except={extension}", f"--load-extension={extension}",
-                  f"--host-resolver-rules=MAP www.dine4fit.com 127.0.0.1:{self.kt.server.server_port}",
+                  f"--host-resolver-rules=MAP ffkt.nks-hub.cz 127.0.0.1:{self.server.server_port}",
                   "--ignore-certificate-errors"])
         self.addCleanup(self.context.close)
-        worker = self.context.service_workers[0] if self.context.service_workers             else self.context.wait_for_event("serviceworker")
-        self.options_url = f"chrome-extension://{worker.url.split('/')[2]}/options.html"
+        if not self.context.service_workers:
+            self.context.wait_for_event("serviceworker")
         menu = (FIXTURES / "racio-6000.html").read_text(encoding="utf-8")
 
         # third-party scripts (the cookie bar among them) would cover the QR codes in screenshots
@@ -53,20 +70,10 @@ class ExtensionTest(unittest.TestCase):
             url = route.request.url
             if url.startswith("https://www.ffmenu.cz/jidelnicek"):
                 return route.fulfill(body=menu, content_type="text/html; charset=utf-8")
-            if url.startswith(("https://www.dine4fit.com/", "chrome-extension://")):
+            if url.startswith(("https://ffkt.nks-hub.cz/", "chrome-extension://")):
                 return route.continue_()
             return route.abort()
         self.context.route("**/*", serve)
-
-    def log_in(self, password="tajne heslo"):
-        page = self.context.new_page()
-        page.goto(self.options_url)
-        page.fill("#email", self.kt.email)
-        page.fill("#password", password)
-        page.click("#save")
-        # extension pages forbid eval, so wait_for_function with a string cannot run there
-        page.wait_for_selector("#status:not(:empty)")
-        return page.inner_text("#status")
 
     def open_menu(self):
         page = self.context.new_page()
@@ -74,43 +81,32 @@ class ExtensionTest(unittest.TestCase):
         page.wait_for_selector(".ffkt-qr")
         return page
 
-    def show_qr(self, page, key):
+    def click_qr(self, page, key):
         box = page.locator(f'.ffkt-qr[data-key="{key}"]')
         box.locator("button").click()
         page.wait_for_selector(f'.ffkt-qr[data-key="{key}"]:is([data-state="done"], [data-state="error"])')
-        self.assertEqual(box.get_attribute("data-state"), "done", box.inner_text())
+        return box
 
-    def scan(self, page, key):
+    def scan(self, box):
         """Decodes the QR code shown for a meal the way a phone camera would."""
         import io
         import zxingcpp
         from PIL import Image
-        image = Image.open(io.BytesIO(page.locator(f'.ffkt-qr[data-key="{key}"] svg').screenshot()))
-        return zxingcpp.read_barcodes(image)[0].text
+        return zxingcpp.read_barcodes(Image.open(io.BytesIO(box.locator("svg").screenshot())))[0].text
 
-    def guid_after_click(self, page, key):
-        self.show_qr(page, key)
-        return self.scan(page, key).rsplit("/", 1)[1]
-
-    def test_qr_appears_after_click_and_opens_its_new_kt_food(self):
-        self.assertIn("Přihlášení funguje", self.log_in())
+    def test_qr_appears_after_click_and_opens_the_kt_food_of_the_meal(self):
         page = self.open_menu()
         self.assertEqual(page.locator(".ffkt-qr svg").count(), 0)
         self.assertEqual(self.kt.foods, {})
 
-        self.show_qr(page, "1:2026-11-23:1")
-        url = self.scan(page, "1:2026-11-23:1")
+        box = self.click_qr(page, "1:2026-11-23:1")
 
+        self.assertEqual(box.get_attribute("data-state"), "done", box.inner_text())
+        url = self.scan(box)
         guid = url.rsplit("/", 1)[1]
         self.assertEqual(url, f"https://dine4fit.com/food/{guid}")
-        self.assertEqual(self.kt.foods, {guid: {
-            "title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)", "foodstuff_type_id": 1026,
-            "unit_name": "porce", "unit_multiplier": "100", "foodstuff_unit": "100g",
-            "energy": "1345", "energy_unit": "kj", "protein": "20", "carbohydrate": "33", "sugar": "0",
-            "fat": "12", "salt": "0", "fiber": "4.8", "cholesterol": "0",
-        }})
-        self.assertEqual(len(self.kt.food_images[guid]), 3)
-        self.assertIn("100 g = 1 porce", page.locator('.ffkt-qr[data-key="1:2026-11-23:1"]').inner_text())
+        self.assertEqual(self.kt.foods[guid]["title"], "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)")
+        self.assertIn("100 g = 1 porce", box.inner_text())
         self.assertEqual(page.locator(".ffkt-qr svg").count(), 1)
 
     def test_kcal_is_shown_next_to_kj(self):
@@ -121,77 +117,27 @@ class ExtensionTest(unittest.TestCase):
         self.assertIn("1 263 kJ (302 kcal)", energy)
         self.assertIn("1 345 kJ (321 kcal)", energy)
 
-    def test_reload_reuses_the_foods_already_created(self):
-        self.log_in()
-        page = self.open_menu()
-        first = self.guid_after_click(page, "1:2026-11-24:2")
-
-        page.reload()
-        page.wait_for_selector(".ffkt-qr")
-
-        self.assertEqual(self.guid_after_click(page, "1:2026-11-24:2"), first)
-        self.assertEqual(len(self.kt.foods), 1)
-
-    PORRIDGE_VALUES = {"energy": "1345", "energy_unit": "kj", "protein": "20", "carbohydrate": "33", "fat": "12",
-                       "fiber": "4.8"}
-
-    def qr_guid_with_existing_food(self, title):
-        self.kt.foods["a" * 32] = {"title": title, **self.PORRIDGE_VALUES}
-        self.log_in()
-        return self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
-
-    def test_food_already_in_kt_is_reused_instead_of_created(self):
-        guid = self.qr_guid_with_existing_food("FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)")
-
-        self.assertEqual(guid, "a" * 32)
-        self.assertEqual(len(self.kt.foods), 1)
-
-    def test_food_from_an_older_version_without_energy_in_title_is_reused(self):
-        self.assertEqual(self.qr_guid_with_existing_food("FF Menu: Ovesná kaše s proteinem a borůvkami"), "a" * 32)
-
-    def test_other_food_with_the_same_values_is_not_reused(self):
-        self.assertNotEqual(self.qr_guid_with_existing_food("Ovesná kaše domácí"), "a" * 32)
-
-    def test_title_kt_already_has_gets_a_suffix(self):
-        self.kt.foods["0" * 32] = {"title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)"}
-        self.log_in()
-
-        guid = self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
-
-        self.assertRegex(self.kt.foods[guid]["title"],
-                         r"^FF Menu: Ovesná kaše s proteinem a borůvkami \(1345 kJ\) · [0-9a-f]{4}$")
-
-    def test_expired_kt_session_logs_in_again(self):
-        self.log_in()
-        self.kt.hashes.clear()
-
-        self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
-
-        self.assertEqual((self.kt.logins, len(self.kt.foods)), (2, 1))
-
-    def test_overloaded_kt_api_is_retried(self):
-        self.log_in()
-        self.kt.unavailable = 2
-
-        self.guid_after_click(self.open_menu(), "1:2026-11-23:1")
-
-        self.assertEqual(len(self.kt.foods), 1)
-
-    def test_wrong_password_is_reported_in_options(self):
-        status = self.log_in(password="spatne")
-
-        self.assertIn("Špatné heslo", status)
-        self.assertEqual(self.kt.logins, 0)
-
-    def test_menu_page_asks_for_login_first(self):
+    def test_kt_failure_is_shown_and_retry_gets_the_qr(self):
+        self.kt.unavailable = 3
         page = self.open_menu()
 
-        page.wait_for_selector(".ffkt-banner")
-        self.assertIn("přihlášení", page.inner_text(".ffkt-banner"))
-        box = page.locator('.ffkt-qr[data-key="1:2026-11-23:1"]')
-        box.locator("button").click()
-        page.wait_for_selector('.ffkt-qr[data-key="1:2026-11-23:1"][data-state="error"]')
-        self.assertEqual(self.kt.foods, {})
+        box = self.click_qr(page, "1:2026-11-23:1")
+
+        self.assertEqual(box.get_attribute("data-state"), "error")
+        self.assertIn("Nepodařilo se", box.inner_text())
+        box.locator("button", has_text="Zkusit znovu").click()
+        page.wait_for_selector('.ffkt-qr[data-key="1:2026-11-23:1"][data-state="done"]')
+        self.assertEqual(len(self.kt.foods), 1)
+
+    def test_unreachable_server_is_reported(self):
+        self.server.shutdown()
+        self.server.server_close()
+        page = self.open_menu()
+
+        box = self.click_qr(page, "1:2026-11-23:1")
+
+        self.assertEqual(box.get_attribute("data-state"), "error")
+        self.assertIn("server doplňku není dostupný", box.inner_text())
 
 
 @unittest.skipUnless(ENABLED, SKIP)
