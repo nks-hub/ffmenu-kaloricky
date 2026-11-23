@@ -1,9 +1,6 @@
 // Meal keys equal Meal.key in ffkt/ffmenu.py: "<product_variant_id>:<YYYY-MM-DD>:<card index in the day>".
 const MONTHS = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září",
   "října", "listopadu", "prosince"];
-// KT diary slots: 1 breakfast, 2 morning snack, 3 lunch, 4 afternoon snack, 5 dinner, 6 second dinner
-const DAY_TIMES = { "Snídaně": 1, "Oběd": 3, "Večeře": 5 };
-const LABELS = { idle: "Do KT", busy: "Zapisuji…", done: "V KT ✓", error: "Chyba, znovu" };
 
 const send = (message) => chrome.runtime.sendMessage(message);
 
@@ -25,15 +22,13 @@ function number(text) {
   return match ? Number(match[0]) : null;
 }
 
-function readMeal(card, key, dayTime) {
+function readMeal(card) {
   const values = {};
   for (const block of card.querySelectorAll(".headings-line-height")) {
     const label = block.querySelector("small")?.textContent.trim();
     if (label) values[label] = number(block.textContent.replace(label, ""));
   }
   return {
-    key,
-    dayTime,
     name: card.querySelector(".mb-1.font-weight-bold")?.textContent.trim(),
     kj: number(card.querySelector(".text-large")?.textContent),
     protein: values["Bílkoviny"],
@@ -44,85 +39,67 @@ function readMeal(card, key, dayTime) {
   };
 }
 
-function menuDays(variant) {
-  return [...document.querySelectorAll(".section-h3")].map((header) => {
+function mealCards(variant) {
+  return [...document.querySelectorAll(".section-h3")].flatMap((header) => {
     const date = isoDay(header.textContent);
     const cards = [...(header.nextElementSibling?.querySelectorAll(".position-relative.product-select-container") ?? [])];
-    let seenLunch = false;
-    const meals = cards.map((card, slot) => {
-      const kind = card.querySelector(".news-slider-tag")?.textContent.trim();
-      const dayTime = DAY_TIMES[kind] ?? (kind === "Svačina" ? (seenLunch ? 4 : 2) : 6);
-      seenLunch = seenLunch || kind === "Oběd";
-      return { card, meal: readMeal(card, `${variant}:${date}:${slot}`, dayTime) };
-    });
-    return { header, date, meals };
-  }).filter((day) => day.date && day.meals.length);
+    const source = `www.ffmenu.cz/jidelnicek, ${date}`;
+    return date ? cards.map((card, slot) => ({
+      card, key: `${variant}:${date}:${slot}`, meal: { ...readMeal(card), source },
+    })) : [];
+  });
 }
 
-function setState(button, state, title = "") {
-  button.textContent = state === "idle" && button.dataset.day ? "Celý den do KT" : LABELS[state];
-  button.disabled = state === "busy" || state === "done";
-  button.dataset.state = state;
-  button.title = title;
-}
-
-function showBanner(text, withSettings) {
-  let banner = document.querySelector(".ffkt-banner");
-  if (!banner) {
-    banner = Object.assign(document.createElement("div"), { className: "ffkt-banner" });
-    document.querySelector("h1")?.after(banner);
-  }
+function showBanner(text) {
+  const banner = Object.assign(document.createElement("div"), { className: "ffkt-banner" });
   banner.textContent = `FF Menu do KT: ${text} `;
-  if (withSettings) {
-    const open = Object.assign(document.createElement("button"), { type: "button", textContent: "Otevřít nastavení" });
-    open.addEventListener("click", () => send({ type: "openOptions" }));
-    banner.append(open);
-  }
+  const open = Object.assign(document.createElement("button"), { type: "button", textContent: "Otevřít nastavení" });
+  open.addEventListener("click", () => send({ type: "openOptions" }));
+  banner.append(open);
+  document.querySelector("h1")?.after(banner);
 }
 
-async function addMeal(button, meal, date) {
-  setState(button, "busy");
-  const response = await send({ type: "add", meal, date });
-  setState(button, response.ok ? "done" : "error", response.ok ? "" : response.error);
-  return response.ok;
+function setBox(box, state, text) {
+  box.dataset.state = state;
+  box.replaceChildren(Object.assign(document.createElement("p"), { className: "ffkt-note", textContent: text }));
+}
+
+async function fillQr(box, meal) {
+  setBox(box, "busy", "Zakládám jídlo v Kalorických tabulkách…");
+  const response = await send({ type: "qr", meal });
+  if (!response.ok) {
+    setBox(box, "error", `Nepodařilo se: ${response.error}`);
+    const retry = Object.assign(document.createElement("button"), { type: "button", textContent: "Zkusit znovu" });
+    retry.addEventListener("click", () => fillQr(box, meal));
+    box.append(retry);
+    return;
+  }
+  const qr = qrcode(0, "M");
+  qr.addData(response.result);
+  qr.make();
+  setBox(box, "done", "Naskenuj v aplikaci Kalorické tabulky, 100 g = 1 porce");
+  box.insertAdjacentHTML("afterbegin", qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }));
 }
 
 async function init() {
   const variant = currentVariant();
-  const days = variant ? menuDays(variant) : [];
-  if (!days.length) return;
+  const meals = variant ? mealCards(variant) : [];
+  if (!meals.length) return;
 
-  for (const day of days) {
-    day.buttons = day.meals.map(({ card, meal }) => {
-      const button = Object.assign(document.createElement("button"), { type: "button", className: "ffkt-btn" });
-      button.dataset.key = meal.key;
-      setState(button, "idle");
-      button.addEventListener("click", () => addMeal(button, meal, day.date));
-      card.append(button);
-      return button;
-    });
-    day.dayButton = Object.assign(document.createElement("button"), { type: "button", className: "ffkt-btn ffkt-day" });
-    day.dayButton.dataset.day = day.date;
-    setState(day.dayButton, "idle");
-    day.dayButton.addEventListener("click", async () => {
-      setState(day.dayButton, "busy");
-      let allDone = true;
-      for (const [i, { meal }] of day.meals.entries()) {
-        if (day.buttons[i].dataset.state !== "done") allDone = (await addMeal(day.buttons[i], meal, day.date)) && allDone;
-      }
-      setState(day.dayButton, allDone ? "done" : "error", allDone ? "" : "některá jídla se nezapsala");
-    });
-    day.header.append(day.dayButton);
-  }
-
-  const added = await send({ type: "added", dates: days.map((d) => d.date) });
-  for (const day of days) {
-    const keys = new Set(added.result[day.date]);
-    day.buttons.forEach((button) => keys.has(button.dataset.key) && setState(button, "done"));
-    if (day.buttons.every((button) => button.dataset.state === "done")) setState(day.dayButton, "done");
-  }
+  const boxes = meals.map(({ card, key }) => {
+    const box = Object.assign(document.createElement("div"), { className: "ffkt-qr" });
+    box.dataset.key = key;
+    card.append(box);
+    return box;
+  });
   if (!(await send({ type: "status" })).result) {
-    showBanner("nejdřív zadej přihlášení do Kalorických tabulek.", true);
+    showBanner("nejdřív zadej přihlášení do Kalorických tabulek.");
+    boxes.forEach((box) => setBox(box, "error", "Chybí přihlášení do Kalorických tabulek."));
+    return;
+  }
+  // one after another: each new food is a POST to Kalorické tabulky
+  for (const [i, { meal }] of meals.entries()) {
+    await fillQr(boxes[i], meal);
   }
 }
 

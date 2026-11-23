@@ -1,9 +1,11 @@
 """Local stand-in for the www.dine4fit.com legacy API, built from what KT Android 3.14.71 sends and expects."""
+import email
 import hashlib
 import json
 import re
 import ssl
 import threading
+import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
@@ -19,6 +21,9 @@ class FakeKT:
         self.unit = unit
         self.hashes = set()
         self.intakes = []
+        # guid -> "data" JSON and the three photos of POST api/v1/food-suggestion/foodstuff
+        self.foods = {}
+        self.food_images = {}
         self.logins = 0
         self.reject_intake = None
         # next N requests get the HAProxy 503 page that the real API returns while overloaded
@@ -77,6 +82,8 @@ class FakeKT:
                     return self.wfile.write(page)
                 url = urlsplit(self.path)
                 q = {k: v[0] for k, v in parse_qs(url.query).items()}
+                if url.path.startswith("/api/"):
+                    return self._json_api(url.path, q, body)
                 if q.get("v") != "621" or q.get("pid") != "aNdV2wl7":
                     return self._result(400, "neznámý klient")
                 if url.path == "/login.api.php":
@@ -89,6 +96,48 @@ class FakeKT:
                 if url.path == "/addPrijem.php" and body is not None:
                     return self._intake(body)
                 self._result(404, "neznámá akce")
+
+            def _send_json(self, status, data):
+                payload = json.dumps(data).encode()
+                self.send_response(status)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+
+            def _json_api(self, path, q, body):
+                if self.headers.get("version") != "621" or self.headers.get("pid") != "aNdV2wl7":
+                    return self._send_json(400, {"message": "neznámý klient"})
+                if self.headers.get("hash") not in fake.hashes:
+                    return self._send_json(401, {"message": "Unauthorized"})
+                if path != "/api/v1/food-suggestion/foodstuff" or body is None or q.get("force") != "true":
+                    return self._send_json(404, {"message": "Not found"})
+                message = email.message_from_bytes(
+                    f"Content-Type: {self.headers['Content-Type']}\r\n\r\n".encode() + body)
+                parts = {}
+                for p in message.get_payload():
+                    parts.setdefault(p.get_param("name", header="content-disposition"), []).append(p)
+                data_part = parts["data"][0]
+                if data_part.get_content_type() != "application/json" or data_part.get_filename():
+                    return self._send_json(400, {"error": "data musí být JSON pole"})
+                # the real API answers "Chybí poviný parametr: 'images'!" unless all three photos have content
+                images = [p.get_payload(decode=True) or b"" for p in parts.get("images", [])]
+                if len(images) != 3 or not all(i.startswith(b"\xff\xd8") for i in images):
+                    return self._send_json(400, {"error": "Chybí poviný parametr: 'images'!", "code": "error"})
+                data = json.loads(data_part.get_payload(decode=True))
+                # required fields as reported by the real POST api/v1/food-suggestion/foodstuff/verify
+                valid = (data.get("title") and data.get("energy_unit") in ("kj", "kcal")
+                         and data.get("foodstuff_unit") in ("100g", "100ml")
+                         and isinstance(data.get("foodstuff_type_id"), int)
+                         and all(isinstance(data.get(f), str) and data[f] for f in
+                                 ("energy", "protein", "carbohydrate", "sugar", "fat", "salt",
+                                  "unit_name", "unit_multiplier")))
+                if not valid:
+                    return self._send_json(400, {"message": "Neplatná potravina"})
+                guid = uuid.uuid4().hex
+                fake.foods[guid] = data
+                fake.food_images[guid] = images
+                self._send_json(200, {"foodstuff_guid": guid})
 
             def _login(self, q):
                 if q.get("Email") != fake.email:

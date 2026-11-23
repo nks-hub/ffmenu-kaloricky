@@ -1,20 +1,47 @@
 {
   "manifest_version": 3,
   "name": "FF Menu do Kalorických tabulek",
-  "version": "1.1.0",
-  "description": "Na jídelníčku ffmenu.cz přidá u každého jídla tlačítko, které ho zapíše do deníku Kalorických tabulek.",
-  "permissions": ["storage"],
-  "host_permissions": ["https://www.dine4fit.com/*"],
+  "version": "2.0.0",
+  "description": "Na jídelníčku ffmenu.cz ukáže u každého jídla QR kód, který jídlo otevře v aplikaci Kalorické tabulky.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.dine4fit.com/*"
+  ],
   "background": {
     "service_worker": "background.js",
-    "scripts": ["md5.js", "background.js"]
+    "scripts": [
+      "md5.js",
+      "background.js"
+    ]
   },
-  "content_scripts": [{
-    "matches": ["https://www.ffmenu.cz/jidelnicek*", "https://ffmenu.cz/jidelnicek*"],
-    "js": ["content.js"],
-    "css": ["content.css"]
-  }],
-  "options_ui": { "page": "options.html", "open_in_tab": true },
-  "action": { "default_title": "FF Menu do KT – nastavení" },
-  "browser_specific_settings": { "gecko": { "id": "ffmenu-kt@local", "strict_min_version": "121.0" } }
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.ffmenu.cz/jidelnicek*",
+        "https://ffmenu.cz/jidelnicek*"
+      ],
+      "js": [
+        "lib/qrcode.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ]
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_title": "FF Menu do KT – nastavení"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ffmenu-kt@local",
+      "strict_min_version": "121.0"
+    }
+  }
 }

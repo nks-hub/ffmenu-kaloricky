@@ -1,7 +1,22 @@
-.ffkt-btn {
-  margin-top: 8px;
-  align-self: flex-start;
-  padding: 6px 12px;
+.ffkt-qr {
+  margin-top: 12px;
+  text-align: center;
+}
+.ffkt-qr svg {
+  width: 160px;
+  height: 160px;
+  background: #fff;
+}
+.ffkt-note {
+  margin: 4px 0;
+  font-size: .85rem;
+  color: #555;
+}
+.ffkt-qr[data-state="error"] .ffkt-note { color: #b3261e; }
+.ffkt-qr button,
+.ffkt-banner button {
+  margin-left: 8px;
+  padding: 4px 10px;
   border: 0;
   border-radius: 6px;
   background: #9a5a0c;
@@ -9,10 +24,6 @@
   font-weight: 600;
   cursor: pointer;
 }
-.ffkt-btn[data-state="done"] { background: #2f7d4a; cursor: default; }
-.ffkt-btn[data-state="error"] { background: #b3261e; }
-.ffkt-btn[data-state="busy"] { opacity: .7; }
-.ffkt-day { margin: 8px 0 0; }
 .ffkt-banner {
   margin: 0 auto 16px;
   max-width: 720px;
@@ -22,13 +33,4 @@
   color: #b3261e;
   text-align: center;
 }
-.ffkt-banner button {
-  margin-left: 8px;
-  padding: 4px 10px;
-  border: 0;
-  border-radius: 6px;
-  background: #b3261e;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
+.ffkt-banner button { background: #b3261e; }

@@ -20,6 +20,6 @@ $("save").addEventListener("click", async () => {
 
   const response = await chrome.runtime.sendMessage({ type: "login" });
   $("status").textContent = response.ok
-    ? `Přihlášení funguje. Energie se zapisuje v ${response.result === "kj" ? "kJ" : "kcal"}, jak máš nastavené v KT.`
+    ? "Přihlášení funguje. Na jídelníčku ffmenu.cz teď uvidíš u jídel QR kódy."
     : `Přihlášení se nepovedlo: ${response.error}`;
 });
