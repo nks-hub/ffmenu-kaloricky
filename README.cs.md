@@ -35,7 +35,7 @@ Po kliknutí se doplněk zeptá serveru na `https://ffkt.nks-hub.cz`. Server si 
 
 ## Server
 
-`python -m ffkt serve` odpovídá na `GET /api/food?key=<program>:<RRRR-MM-DD>:<pořadí>` odkazem pro QR kód. Tahle cesta token nechce, ale přijme jen jídla z týdnů, které ffmenu.cz ukazuje (minulý, tento a příští). Zápis do deníku token chce dál.
+`python -m ffkt serve` odpovídá na `GET /api/food?key=<program>:<RRRR-MM-DD>:<pořadí>` odkazem pro QR kód. Tahle cesta token nechce, ale přijme jen jídla z týdnů, které ffmenu.cz ukazuje (minulý, tento a příští). Zápis do deníku token chce dál. Docker obraz stránku pro mobil nemá: zapisovala by do deníku účtu serveru, takže patří do lokální instalace s tvým vlastním účtem (viz níž).
 
 V Dockeru: vedle `docker-compose.yml` založ `.env` s účtem:
 

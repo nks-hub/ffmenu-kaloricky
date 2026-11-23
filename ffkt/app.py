@@ -257,7 +257,7 @@ def make_server(service, host, port, token=None):
 
         def do_GET(self):
             url = urlsplit(self.path)
-            if url.path in ("/", "/index.html"):
+            if url.path in ("/", "/index.html") and PAGE.exists():
                 return self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
             self._api(url, None)
 

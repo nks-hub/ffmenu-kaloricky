@@ -48,7 +48,7 @@ When you click, the extension asks the server at `https://ffkt.nks-hub.cz`. The 
 
 ## Server
 
-`python -m ffkt serve` answers `GET /api/food?key=<program>:<YYYY-MM-DD>:<position>` with the QR link of the meal. The route needs no token; it only accepts meals of the menu weeks ffmenu.cz shows (last, this and next week). The diary routes of the label scanner need the token.
+`python -m ffkt serve` answers `GET /api/food?key=<program>:<YYYY-MM-DD>:<position>` with the QR link of the meal. The route needs no token; it only accepts meals of the menu weeks ffmenu.cz shows (last, this and next week). The diary routes of the label scanner need the token. The Docker image leaves out the phone page: it writes into the diary of the server's account, so it belongs to a local install with your own account (see below).
 
 To run it with Docker, put the account into `.env` next to `docker-compose.yml`:
 

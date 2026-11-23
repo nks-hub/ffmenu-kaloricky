@@ -3,6 +3,7 @@ import json
 import tempfile
 import threading
 import unittest
+import unittest.mock
 import urllib.error
 import urllib.request
 from datetime import date
@@ -129,6 +130,11 @@ class ServiceApiTest(AppTest):
 
         self.assertEqual(status, 200)
         self.assertIn("<title>", text)
+
+    def test_server_without_the_page_answers_root_with_404(self):
+        # the Docker image ships only the API: the page writes into the diary of the server's shared account
+        with unittest.mock.patch("ffkt.app.PAGE", Path(tempfile.gettempdir()) / "ffkt-missing-page.html"):
+            self.assertEqual(self.call("/")[0], 404)
 
 
 PORRIDGE_KEY = "1:2026-11-23:1"
