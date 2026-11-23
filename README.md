@@ -40,7 +40,7 @@ The same zip is the upload for the Chrome Web Store; the listing texts, privacy 
 
 ## Usage
 
-Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Below every meal a QR code appears. In the Kalorické tabulky app tap "Čárový kód", point the camera at the code and add the food that opens. The food is named `FF Menu: <meal>` and one portion is entered as 100 g, because FF Menu does not publish the weight of a portion.
+Open [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) and pick your program. Below every meal a QR code appears. In the Kalorické tabulky app tap "Čárový kód", point the camera at the code and add the food that opens. The food is named `FF Menu: <meal> (<portion energy> kJ)` and one portion is entered as 100 g, because FF Menu does not publish the weight of a portion. Kalorické tabulky fails with an error on a title it already has, so a repeated title gets a four-character suffix.
 
 The extension creates the food under your account the first time it shows the meal. Kalorické tabulky makes new foods available to all its users, so these foods are public in their database.
 

@@ -27,7 +27,7 @@ Doplněk načte i Firefox 121 a novější. Část na stránce jídelníčku jse
 
 ## Použití
 
-Otevři [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) a vyber svůj program. Pod každým jídlem se objeví QR kód. V aplikaci Kalorické tabulky klepni na „Čárový kód“, namiř fotoaparát na kód a otevřenou potravinu přidej. Jmenuje se `FF Menu: <jídlo>` a jedna porce se zadává jako 100 g, protože FF Menu váhu porce neuvádí.
+Otevři [ffmenu.cz/jidelnicek](https://www.ffmenu.cz/jidelnicek) a vyber svůj program. Pod každým jídlem se objeví QR kód. V aplikaci Kalorické tabulky klepni na „Čárový kód“, namiř fotoaparát na kód a otevřenou potravinu přidej. Jmenuje se `FF Menu: <jídlo> (<energie porce> kJ)` a jedna porce se zadává jako 100 g, protože FF Menu váhu porce neuvádí. Název, který už v Kalorických tabulkách je, končí u nich chybou, proto dostane opakovaný název čtyřznakovou příponu.
 
 Potravinu doplněk založí pod tvým účtem, když jídlo poprvé zobrazí. Kalorické tabulky nové potraviny zpřístupňují všem uživatelům, takže jsou v jejich databázi veřejné.
 
