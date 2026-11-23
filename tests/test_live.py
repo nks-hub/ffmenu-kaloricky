@@ -10,6 +10,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import tempfile
 import time
 import unittest
@@ -156,7 +157,8 @@ class LiveExtensionTest(unittest.TestCase):
 
         self.assertRegex(url, r"^https://dine4fit\.com/food/[0-9a-f]{32}$")
         food = Diary(self.client)._api(f"v1/foodstuff/{url.rsplit('/', 1)[1]}")
-        self.assertEqual(food["title"], f"FF Menu: {meal.name}")
+        # a title KT already has (an earlier run) gets a short suffix
+        self.assertRegex(food["title"], rf"^FF Menu: {re.escape(meal.name)} \({meal.kj:.0f} kJ\)( · [0-9a-f]{{4}})?$")
         self.assertIn({"title": "100 g", "multiplier": 100.0},
                       [{k: u[k] for k in ("title", "multiplier")} for u in food["units"]])
         # KT stores values per gram; the 100 g unit stands for one FF Menu portion

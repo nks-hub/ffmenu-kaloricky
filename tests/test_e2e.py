@@ -99,7 +99,7 @@ class ExtensionTest(unittest.TestCase):
         guid = url.rsplit("/", 1)[1]
         self.assertEqual(url, f"https://dine4fit.com/food/{guid}")
         self.assertEqual(self.kt.foods[guid], {
-            "title": "FF Menu: Ovesná kaše s proteinem a borůvkami", "foodstuff_type_id": 1026,
+            "title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)", "foodstuff_type_id": 1026,
             "unit_name": "porce", "unit_multiplier": "100", "foodstuff_unit": "100g",
             "energy": "1345", "energy_unit": "kj", "protein": "20", "carbohydrate": "33", "sugar": "0",
             "fat": "12", "salt": "0", "fiber": "4.8", "cholesterol": "0",
@@ -121,6 +121,17 @@ class ExtensionTest(unittest.TestCase):
 
         self.assertEqual(self.scan(page, "1:2026-11-24:2"), first)
         self.assertEqual(len(self.kt.foods), 25)
+
+    def test_title_kt_already_has_gets_a_suffix(self):
+        self.kt.foods["0" * 32] = {"title": "FF Menu: Ovesná kaše s proteinem a borůvkami (1345 kJ)"}
+        self.log_in()
+        page = self.open_menu()
+        self.wait_all_qr(page)
+
+        guid = self.scan(page, "1:2026-11-23:1").rsplit("/", 1)[1]
+
+        self.assertRegex(self.kt.foods[guid]["title"],
+                         r"^FF Menu: Ovesná kaše s proteinem a borůvkami \(1345 kJ\) · [0-9a-f]{4}$")
 
     def test_expired_kt_session_logs_in_again(self):
         self.log_in()

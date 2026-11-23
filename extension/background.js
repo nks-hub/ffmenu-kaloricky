@@ -118,11 +118,11 @@ function multipart(data, photo) {
   return { body: new Blob(parts), type: `multipart/form-data; boundary=${boundary}` };
 }
 
-async function createFood(hash, meal) {
+async function createFood(hash, meal, title) {
   // FF Menu gives values per portion without its weight, so one portion is declared as 100 g.
   // KT rejects a food without category, sugar and salt; FF Menu publishes neither of the two, so they are 0.
   const { body, type } = multipart({
-    title: `FF Menu: ${meal.name}`,
+    title,
     foodstuff_type_id: READY_MEALS_CATEGORY,
     unit_name: "porce",
     unit_multiplier: "100",
@@ -161,7 +161,15 @@ async function foodQr(meal) {
   const key = `food:${md5(JSON.stringify(values))}`;
   let guid = (await chrome.storage.local.get(key))[key];
   if (!guid) {
-    guid = await withSession((hash) => createFood(hash, meal));
+    // the portion energy tells programs apart; KT answers 500 for a title it already has, so a repeat
+    // (another user's food, or this dish created before the browser data was cleared) gets a suffix
+    const title = `FF Menu: ${meal.name} (${meal.kj} kJ)`;
+    try {
+      guid = await withSession((hash) => createFood(hash, meal, title));
+    } catch (error) {
+      if (error.code !== 500) throw error;
+      guid = await withSession((hash) => createFood(hash, meal, `${title} · ${crypto.randomUUID().slice(0, 4)}`));
+    }
     await chrome.storage.local.set({ [key]: guid });
   }
   return QR_FOOD_PREFIX + guid;

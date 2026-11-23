@@ -134,6 +134,9 @@ class FakeKT:
                                   "unit_name", "unit_multiplier")))
                 if not valid:
                     return self._send_json(400, {"message": "Neplatná potravina"})
+                # the real API fails this way on a title it already has (seen 23 Nov 2026)
+                if any(food["title"] == data["title"] for food in fake.foods.values()):
+                    return self._send_json(500, {"error": "Nastala neočekávaná chyba!", "code": "error"})
                 guid = uuid.uuid4().hex
                 fake.foods[guid] = data
                 fake.food_images[guid] = images
