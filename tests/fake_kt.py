@@ -2,13 +2,18 @@
 import hashlib
 import json
 import re
+import ssl
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
+
+# self-signed, for browser tests that map www.dine4fit.com to this server
+TLS = Path(__file__).parent / "fixtures" / "tls"
 
 
 class FakeKT:
-    def __init__(self, email="jan@example.com", password="tajne heslo", unit="kj"):
+    def __init__(self, email="jan@example.com", password="tajne heslo", unit="kj", tls=False):
         self.email = email
         self.password_md5 = hashlib.md5(password.encode()).hexdigest()
         self.unit = unit
@@ -17,11 +22,16 @@ class FakeKT:
         self.logins = 0
         self.reject_intake = None
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), self._handler())
+        if tls:
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            context.load_cert_chain(TLS / "cert.pem", TLS / "key.pem")
+            self.server.socket = context.wrap_socket(self.server.socket, server_side=True)
+        self.scheme = "https" if tls else "http"
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
     @property
     def url(self):
-        return f"http://127.0.0.1:{self.server.server_port}/"
+        return f"{self.scheme}://127.0.0.1:{self.server.server_port}/"
 
     def close(self):
         self.server.shutdown()

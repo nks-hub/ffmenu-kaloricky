@@ -9,23 +9,25 @@
   input { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
   button { margin-top: 20px; font: inherit; font-weight: 600; padding: 10px 16px; border: 0; border-radius: 6px;
            background: #9a5a0c; color: #fff; cursor: pointer; }
-  p.hint { color: #666; font-size: .9rem; margin: 4px 0; }
+  p.hint { color: #555; font-size: .9rem; margin: 4px 0; }
   #status { margin-top: 16px; }
 </style>
 </head>
 <body>
 <h1>FF Menu do Kalorických tabulek</h1>
-<p class="hint">Doplněk posílá jídla službě <code>python -m ffkt serve</code>. Ta drží přihlášení do Kalorických tabulek.</p>
+<p class="hint">Na stránce jídelníčku ffmenu.cz přibude u každého jídla tlačítko „Do KT“.
+  Doplněk zapisuje přímo do tvého deníku v Kalorických tabulkách.</p>
 
-<label for="url">Adresa služby</label>
-<input id="url" placeholder="http://127.0.0.1:8077">
-<p class="hint">Sem můžeš vložit i celý odkaz z QR kódu na stránce služby, token se doplní sám.</p>
+<label for="email">E-mail do Kalorických tabulek</label>
+<input id="email" type="email" autocomplete="username">
 
-<label for="token">Přístupový token</label>
-<input id="token" placeholder="token z config.local.json">
+<label for="password">Heslo</label>
+<input id="password" type="password" autocomplete="current-password">
+<p class="hint">Heslo se neukládá, doplněk si drží jen jeho MD5 hash, se kterým se přihlašuje i aplikace KT.</p>
 
 <button id="save">Uložit a ověřit</button>
 <p id="status" role="status"></p>
+<script src="md5.js"></script>
 <script src="options.js"></script>
 </body>
 </html>

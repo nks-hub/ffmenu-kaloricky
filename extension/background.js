@@ -1,30 +1,124 @@
-// Requests go from here, not from the content script: ffmenu.cz is HTTPS and the service usually plain
-// HTTP on the local network, which the page itself is not allowed to call.
-const DEFAULTS = { serviceUrl: "http://127.0.0.1:8077", token: "" };
+// Kalorické tabulky client, same protocol as ffkt/kt.py (legacy XML API of KT Android 3.14.71).
+if (typeof md5 === "undefined") importScripts("md5.js");
 
-async function call(path, body) {
-  const { serviceUrl, token } = { ...DEFAULTS, ...(await chrome.storage.local.get(["serviceUrl", "token"])) };
-  try {
-    const response = await fetch(serviceUrl.replace(/\/+$/, "") + path, {
-      method: body ? "POST" : "GET",
-      headers: { "Content-Type": "application/json", "X-Token": token },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return { status: response.status, data: await response.json().catch(() => ({})) };
-  } catch (error) {
-    return { status: 0, data: { error: `Služba na ${serviceUrl} neodpovídá (běží python -m ffkt serve?)` } };
+const KT_URL = "https://www.dine4fit.com/";
+// app version code and client id that the Android app appends to every legacy request
+const APP_PARAMS = { v: "621", pid: "aNdV2wl7" };
+const KJ_PER_KCAL = 4.1871;
+// 450 = logged out, 451 = token belongs to another user; both are fixed by logging in again
+const SESSION_LOST = new Set([450, 451]);
+// diary time written for each KT slot (ID_Cas 1-6)
+const SLOT_TIMES = { 1: "07:00", 2: "10:00", 3: "12:00", 4: "15:00", 5: "18:00", 6: "20:00" };
+
+class KTError extends Error {
+  constructor(code, message) {
+    super(`${code}: ${message}`);
+    this.code = code;
   }
 }
 
+function field(xml, name) {
+  const match = xml.match(new RegExp(`<${name}>([^<]*)</${name}>`));
+  if (!match) return null;
+  return match[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+}
+
+async function ktRequest(path, params, body) {
+  const url = new URL(path, KT_URL);
+  for (const [name, value] of Object.entries({ ...params, ...APP_PARAMS })) url.searchParams.set(name, value);
+  const response = await fetch(url, body && {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=UTF-8" },
+    body: JSON.stringify(body),
+  });
+  const xml = await response.text();
+  if (!response.ok) throw new KTError(response.status, response.statusText);
+  if (/^\s*(<\?xml[^>]*\?>\s*)?<result[\s>]/.test(xml)) {
+    const code = Number(field(xml, "code"));
+    if (!(code >= 200 && code < 300)) throw new KTError(code, field(xml, "msg") || "");
+  }
+  return xml;
+}
+
+async function session(fresh) {
+  const stored = await chrome.storage.local.get(["email", "passwordMd5", "hash", "unit"]);
+  if (!stored.email || !stored.passwordMd5) {
+    throw new KTError(0, "v nastavení doplňku chybí přihlášení do Kalorických tabulek");
+  }
+  if (stored.hash && !fresh) return stored;
+  const hash = field(await ktRequest("login.api.php", { Email: stored.email, Pass: stored.passwordMd5 }), "hash");
+  if (!hash) throw new KTError(0, "přihlášení nevrátilo hash uživatele");
+  // the app assumes kcal when the account has no preferred unit
+  const unit = (field(await ktRequest("getInfo.php", { HASH_Uzivatel: hash }), "preferUnit") || "kcal").toLowerCase();
+  await chrome.storage.local.set({ hash, unit });
+  return { ...stored, hash, unit };
+}
+
+async function withSession(call) {
+  try {
+    return await call(await session(false));
+  } catch (error) {
+    if (!SESSION_LOST.has(error.code)) throw error;
+    return call(await session(true));
+  }
+}
+
+function validMeal(meal, date) {
+  const numbers = ["kj", "protein", "carbs", "fat", "fiber", "cholesterol"];
+  return meal && /^\d+:\d{4}-\d\d-\d\d:\d+$/.test(meal.key) && /^\d{4}-\d\d-\d\d$/.test(date)
+    && typeof meal.name === "string" && meal.name.trim() && meal.dayTime in SLOT_TIMES
+    && numbers.every((n) => Number.isFinite(meal[n]) && meal[n] >= 0);
+}
+
+async function addMeal(meal, date) {
+  if (!validMeal(meal, date)) throw new KTError(0, "jídlo na stránce se nepodařilo přečíst");
+  const storageKey = `added:${date}`;
+  const added = (await chrome.storage.local.get(storageKey))[storageKey] || [];
+  if (added.includes(meal.key)) return "already";
+  await withSession((s) => ktRequest("addPrijem.php", { HASH_Uzivatel: s.hash }, {
+    Datum: date,
+    Cas: SLOT_TIMES[meal.dayTime],
+    ID_Cas: meal.dayTime,
+    Polozky: [{
+      Typ: "vlozenaHodnota",
+      Nazev: `FF Menu: ${meal.name}`,
+      Energie: s.unit === "kj" ? meal.kj : Math.round((meal.kj / KJ_PER_KCAL) * 10) / 10,
+      Bilkoviny: meal.protein,
+      Sacharidy: meal.carbs,
+      Tuky: meal.fat,
+      Vlaknina: meal.fiber,
+      Cholesterol: meal.cholesterol,
+    }],
+  }));
+  added.push(meal.key);
+  await chrome.storage.local.set({ [storageKey]: added });
+  return "added";
+}
+
+async function addedOn(dates) {
+  const stored = await chrome.storage.local.get(dates.map((d) => `added:${d}`));
+  return Object.fromEntries(dates.map((d) => [d, stored[`added:${d}`] || []]));
+}
+
+async function credentialsSet() {
+  const { email, passwordMd5 } = await chrome.storage.local.get(["email", "passwordMd5"]);
+  return Boolean(email && passwordMd5);
+}
+
+const handlers = {
+  add: (m) => addMeal(m.meal, m.date),
+  added: (m) => addedOn(m.dates),
+  status: () => credentialsSet(),
+  login: async () => (await session(true)).unit,
+  openOptions: () => chrome.runtime.openOptionsPage(),
+};
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const query = (params) => new URLSearchParams(params).toString();
-  const routes = {
-    add: () => call("/api/add", { key: message.key, date: message.date }),
-    addDay: () => call("/api/add-day", { date: message.date, program: message.program }),
-    menu: () => call(`/api/menu?${query({ date: message.date, program: message.program || "" })}`),
-  };
-  if (!routes[message.type]) return false;
-  routes[message.type]().then(sendResponse);
+  const handler = handlers[message.type];
+  if (!handler) return false;
+  Promise.resolve(handler(message))
+    .then((result) => sendResponse({ ok: true, result }))
+    .catch((error) => sendResponse({ ok: false, error: error.message }));
   return true;
 });
 

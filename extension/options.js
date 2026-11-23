@@ -1,34 +1,25 @@
 const $ = (id) => document.getElementById(id);
-const LOCAL = ["127.0.0.1", "localhost"];
 
-chrome.storage.local.get(["serviceUrl", "token"]).then(({ serviceUrl, token }) => {
-  $("url").value = serviceUrl || "http://127.0.0.1:8077";
-  $("token").value = token || "";
+chrome.storage.local.get(["email", "passwordMd5"]).then(({ email, passwordMd5 }) => {
+  $("email").value = email || "";
+  $("password").placeholder = passwordMd5 ? "uložené, vyplň jen pro změnu" : "";
 });
 
 $("save").addEventListener("click", async () => {
-  let url;
-  try {
-    url = new URL($("url").value.trim());
-  } catch (error) {
-    $("status").textContent = "Adresa služby není platná URL.";
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  const { passwordMd5 } = await chrome.storage.local.get("passwordMd5");
+  if (!email || (!password && !passwordMd5)) {
+    $("status").textContent = "Vyplň e-mail i heslo.";
     return;
   }
-  const fromLink = new URLSearchParams(url.hash.slice(1)).get("t");
-  const token = fromLink || $("token").value.trim();
-  const serviceUrl = url.origin;
+  // a changed login invalidates the stored KT session
+  await chrome.storage.local.set({ email, passwordMd5: password ? md5(password) : passwordMd5 });
+  await chrome.storage.local.remove(["hash", "unit"]);
+  $("password").value = "";
 
-  // the service may run on another machine; that origin needs its own host permission
-  if (!LOCAL.includes(url.hostname) && !(await chrome.permissions.request({ origins: [`${url.origin}/*`] }))) {
-    $("status").textContent = "Bez povolení přístupu k adrese služby doplněk nemůže zapisovat.";
-    return;
-  }
-  await chrome.storage.local.set({ serviceUrl, token });
-  $("url").value = serviceUrl;
-  $("token").value = token;
-
-  const { status, data } = await chrome.runtime.sendMessage({ type: "menu", date: new Date().toISOString().slice(0, 10) });
-  $("status").textContent = status === 200
-    ? `Uloženo. Spojení funguje, program: ${data.programs[data.program]}.`
-    : `Uloženo, ale služba hlásí: ${data.error || `chyba ${status}`}`;
+  const response = await chrome.runtime.sendMessage({ type: "login" });
+  $("status").textContent = response.ok
+    ? `Přihlášení funguje. Energie se zapisuje v ${response.result === "kj" ? "kJ" : "kcal"}, jak máš nastavené v KT.`
+    : `Přihlášení se nepovedlo: ${response.error}`;
 });
