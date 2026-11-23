@@ -1,5 +1,7 @@
 """Client for the legacy XML API of Kalorické tabulky (www.dine4fit.com), as called by KT Android 3.14.71."""
 import json
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -11,6 +13,9 @@ APP_PARAMS = {"v": "621", "pid": "aNdV2wl7"}
 KJ_PER_KCAL = 4.1871
 # 450 = logged out, 451 = token belongs to another user; both are fixed by logging in again
 SESSION_LOST = {450, 451}
+# seconds between attempts; KT's load balancer answered "503 No server is available" in bursts of
+# about a minute on 23 Nov 2026, and such a request never reached the application, so a retry is safe
+RETRY_DELAYS = (2, 5)
 
 
 class KTError(Exception):
@@ -20,13 +25,15 @@ class KTError(Exception):
 
 
 class KTClient:
-    def __init__(self, email, password_md5, base_url=BASE_URL, timeout=20):
+    # login.api.php answered in 2-8 s and once in over 20 s right after an account was confirmed (23 Nov 2026)
+    def __init__(self, email, password_md5, base_url=BASE_URL, timeout=60):
         self.email = email
         self.password_md5 = password_md5
         self.base_url = base_url
         self.timeout = timeout
         self.hash = None
         self._unit = None
+        self.retry_delays = RETRY_DELAYS
 
     def _request(self, path, params, body=None):
         query = urllib.parse.urlencode({**params, **APP_PARAMS})
@@ -35,8 +42,15 @@ class KTClient:
             data=None if body is None else json.dumps(body, ensure_ascii=False).encode(),
             headers={"Content-Type": "application/json; charset=UTF-8", "User-Agent": "okhttp/4.12.0"},
         )
-        with urllib.request.urlopen(request, timeout=self.timeout) as response:
-            root = ET.fromstring(response.read())
+        for delay in (*self.retry_delays, None):
+            try:
+                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                    root = ET.fromstring(response.read())
+                break
+            except urllib.error.HTTPError as error:
+                if error.code != 503 or delay is None:
+                    raise
+                time.sleep(delay)
         if root.tag == "result":
             code = int(root.findtext("code", "0"))
             if not 200 <= code < 300:

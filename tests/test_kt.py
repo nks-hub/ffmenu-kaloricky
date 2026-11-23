@@ -1,5 +1,6 @@
 import hashlib
 import unittest
+import urllib.error
 from datetime import date
 
 from fake_kt import FakeKT
@@ -48,6 +49,23 @@ class KTClientTest(unittest.TestCase):
 
         self.assertEqual(self.kt.logins, 2)
         self.assertEqual(len(self.kt.intakes), 2)
+
+    def test_overloaded_api_is_retried_until_it_answers(self):
+        self.client.retry_delays = (0, 0)
+        self.kt.unavailable = 2
+
+        self.client.add_custom(**PORRIDGE)
+
+        self.assertEqual(len(self.kt.intakes), 1)
+
+    def test_api_down_for_longer_raises_after_three_attempts(self):
+        self.client.retry_delays = (0, 0)
+        self.kt.unavailable = 3
+
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.client.login()
+
+        self.assertEqual((error.exception.code, self.kt.unavailable), (503, 0))
 
     def test_unknown_email_reports_server_message(self):
         client = KTClient("nikdo@example.com", md5("x"), base_url=self.kt.url)

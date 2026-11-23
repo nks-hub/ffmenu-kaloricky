@@ -21,11 +21,16 @@ class FakeKT:
         self.intakes = []
         self.logins = 0
         self.reject_intake = None
+        # next N requests get the HAProxy 503 page that the real API returns while overloaded
+        self.unavailable = 0
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), self._handler())
         if tls:
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             context.load_cert_chain(TLS / "cert.pem", TLS / "key.pem")
-            self.server.socket = context.wrap_socket(self.server.socket, server_side=True)
+            # handshake in the request thread: a browser preconnect that never sends ClientHello
+            # would otherwise block the accept loop and stall every later request
+            self.server.socket = context.wrap_socket(self.server.socket, server_side=True,
+                                                     do_handshake_on_connect=False)
         self.scheme = "https" if tls else "http"
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
@@ -62,6 +67,14 @@ class FakeKT:
                 self._reply(f"<result><code>{code}</code><msg>{msg}</msg></result>")
 
             def _dispatch(self, body):
+                if fake.unavailable:
+                    fake.unavailable -= 1
+                    page = b"<html><body><h1>503 Service Unavailable</h1>\nNo server is available to handle this request.\n</body></html>\n"
+                    self.send_response(503)
+                    self.send_header("Content-Type", "text/html")
+                    self.send_header("Content-Length", str(len(page)))
+                    self.end_headers()
+                    return self.wfile.write(page)
                 url = urlsplit(self.path)
                 q = {k: v[0] for k, v in parse_qs(url.query).items()}
                 if q.get("v") != "621" or q.get("pid") != "aNdV2wl7":

@@ -7,6 +7,8 @@ const APP_PARAMS = { v: "621", pid: "aNdV2wl7" };
 const KJ_PER_KCAL = 4.1871;
 // 450 = logged out, 451 = token belongs to another user; both are fixed by logging in again
 const SESSION_LOST = new Set([450, 451]);
+// waits between attempts after "503 No server is available" from KT's load balancer (see RETRY_DELAYS in ffkt/kt.py)
+const RETRY_DELAYS_MS = [2000, 5000];
 // diary time written for each KT slot (ID_Cas 1-6)
 const SLOT_TIMES = { 1: "07:00", 2: "10:00", 3: "12:00", 4: "15:00", 5: "18:00", 6: "20:00" };
 
@@ -26,11 +28,16 @@ function field(xml, name) {
 async function ktRequest(path, params, body) {
   const url = new URL(path, KT_URL);
   for (const [name, value] of Object.entries({ ...params, ...APP_PARAMS })) url.searchParams.set(name, value);
-  const response = await fetch(url, body && {
-    method: "POST",
-    headers: { "Content-Type": "application/json; charset=UTF-8" },
-    body: JSON.stringify(body),
-  });
+  let response;
+  for (const delay of [...RETRY_DELAYS_MS, null]) {
+    response = await fetch(url, body && {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+      body: JSON.stringify(body),
+    });
+    if (response.status !== 503 || delay === null) break;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
   const xml = await response.text();
   if (!response.ok) throw new KTError(response.status, response.statusText);
   if (/^\s*(<\?xml[^>]*\?>\s*)?<result[\s>]/.test(xml)) {

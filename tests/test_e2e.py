@@ -69,8 +69,10 @@ class ExtensionTest(unittest.TestCase):
         return page
 
     def click_meal(self, page, key):
-        page.locator(f'.ffkt-btn[data-key="{key}"]').click()
-        page.wait_for_selector(f'.ffkt-btn[data-key="{key}"][data-state="done"]')
+        button = page.locator(f'.ffkt-btn[data-key="{key}"]')
+        button.click()
+        page.wait_for_selector(f'.ffkt-btn[data-key="{key}"]:is([data-state="done"], [data-state="error"])')
+        self.assertEqual(button.get_attribute("data-state"), "done", button.get_attribute("title"))
 
     def test_meal_button_writes_values_read_from_the_page(self):
         self.assertIn("Přihlášení funguje", self.log_in())
@@ -128,6 +130,15 @@ class ExtensionTest(unittest.TestCase):
         self.click_meal(page, "1:2026-11-23:1")
 
         self.assertEqual((self.kt.logins, len(self.kt.intakes)), (2, 2))
+
+    def test_overloaded_kt_api_is_retried(self):
+        self.log_in()
+        page = self.open_menu()
+        self.kt.unavailable = 2
+
+        self.click_meal(page, "1:2026-11-23:1")
+
+        self.assertEqual(len(self.kt.intakes), 1)
 
     def test_wrong_password_is_reported_in_options(self):
         status = self.log_in(password="spatne")
