@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "FF Menu do Kalorických tabulek",
+  "version": "1.0.0",
+  "description": "Na jídelníčku ffmenu.cz přidá u každého jídla tlačítko, které ho zapíše do deníku Kalorických tabulek.",
+  "permissions": ["storage"],
+  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [{
+    "matches": ["https://www.ffmenu.cz/jidelnicek*", "https://ffmenu.cz/jidelnicek*"],
+    "js": ["content.js"],
+    "css": ["content.css"]
+  }],
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "action": { "default_title": "FF Menu do KT – nastavení" },
+  "browser_specific_settings": { "gecko": { "id": "ffmenu-kt@local" } }
+}

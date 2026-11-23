@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>FF Menu do KT – nastavení</title>
+<style>
+  body { font: 16px/1.4 system-ui, sans-serif; max-width: 560px; margin: 32px auto; padding: 0 16px; }
+  label { display: block; margin: 16px 0 4px; font-weight: 600; }
+  input { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+  button { margin-top: 20px; font: inherit; font-weight: 600; padding: 10px 16px; border: 0; border-radius: 6px;
+           background: #9a5a0c; color: #fff; cursor: pointer; }
+  p.hint { color: #666; font-size: .9rem; margin: 4px 0; }
+  #status { margin-top: 16px; }
+</style>
+</head>
+<body>
+<h1>FF Menu do Kalorických tabulek</h1>
+<p class="hint">Doplněk posílá jídla službě <code>python -m ffkt serve</code>. Ta drží přihlášení do Kalorických tabulek.</p>
+
+<label for="url">Adresa služby</label>
+<input id="url" placeholder="http://127.0.0.1:8077">
+<p class="hint">Sem můžeš vložit i celý odkaz z QR kódu na stránce služby, token se doplní sám.</p>
+
+<label for="token">Přístupový token</label>
+<input id="token" placeholder="token z config.local.json">
+
+<button id="save">Uložit a ověřit</button>
+<p id="status" role="status"></p>
+<script src="options.js"></script>
+</body>
+</html>
