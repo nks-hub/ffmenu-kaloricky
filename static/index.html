@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FF Menu do KT</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --card: #fff; --text: #1d1d1b; --muted: #6b6a66; --line: #e3e1db;
+    --accent: #c47a1c; --accent-text: #fff; --ok: #2f7d4a; --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161614; --card: #22211f; --text: #ecebe7; --muted: #a3a19b; --line: #3a3935;
+            --accent: #e0973a; --accent-text: #161614; --ok: #6fc28b; --err: #f2867e; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.25rem; margin: 4px 0 16px; }
+  h2 { font-size: 1rem; margin: 0 0 12px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+            padding: 16px; margin-bottom: 16px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  label.field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); flex: 1; }
+  input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+                  background: var(--bg); color: var(--text); min-height: 44px; }
+  button, .button { font: inherit; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 14px;
+                    min-height: 44px; background: var(--accent); color: var(--accent-text); cursor: pointer; }
+  button:disabled { opacity: .55; cursor: default; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .meal { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .meal:first-of-type { border-top: 0; }
+  .meal .info { flex: 1; min-width: 0; }
+  .meal .kind { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .meal .name { font-weight: 600; }
+  .meal .values { font-size: .85rem; color: var(--muted); }
+  .status { min-height: 1.4em; margin: 8px 0 0; color: var(--muted); }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); }
+  #scan-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  #qr svg { width: 220px; height: 220px; background: #fff; border-radius: 8px; }
+  #qr-url { word-break: break-all; font-size: .85rem; color: var(--muted); }
+  summary { cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>FF Menu → Kalorické tabulky</h1>
+
+  <section>
+    <div class="row">
+      <label class="field">Den <input type="date" id="day"></label>
+      <label class="field">Program <select id="program"></select></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Naskenovat štítek</h2>
+    <label class="button" for="scan-input">Vyfotit štítek</label>
+    <input type="file" id="scan-input" accept="image/*" capture="environment">
+    <p class="status" id="scan-status" role="status"></p>
+    <div id="candidates"></div>
+  </section>
+
+  <section>
+    <div class="row" style="justify-content: space-between; margin-bottom: 4px">
+      <h2 style="margin: 0">Jídelníček dne</h2>
+      <button class="ghost" id="add-day">Zapsat celý den</button>
+    </div>
+    <div id="menu"></div>
+    <p class="status" id="menu-status" role="status"></p>
+  </section>
+
+  <section>
+    <details id="pair">
+      <summary>Otevřít v mobilu (QR)</summary>
+      <div id="qr" style="margin-top: 12px"></div>
+      <p id="qr-url"></p>
+    </details>
+  </section>
+</main>
+<script>
+const TESSERACT = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+const QRCODE = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
+const $ = (id) => document.getElementById(id);
+
+let token = "";
+try {
+  const fromLink = new URLSearchParams(location.hash.slice(1)).get("t");
+  if (fromLink) { localStorage.setItem("ffkt-token", fromLink); history.replaceState(null, "", location.pathname); }
+  token = localStorage.getItem("ffkt-token") || "";
+} catch (e) { token = new URLSearchParams(location.hash.slice(1)).get("t") || ""; }
+
+async function api(path, body) {
+  const response = await fetch(path, {
+    method: body ? "POST" : "GET",
+    headers: { "Content-Type": "application/json", "X-Token": token },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(data.error || `HTTP ${response.status}`), { status: response.status });
+  return data;
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const script = Object.assign(document.createElement("script"), { src, onload: resolve, onerror: reject });
+    document.head.append(script);
+  });
+}
+
+function setStatus(id, text, kind = "") {
+  const el = $(id);
+  el.textContent = text;
+  el.className = `status ${kind}`;
+}
+
+const today = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const kj = (n) => Math.round(n).toLocaleString("cs-CZ");
+const dayLabel = (iso) => new Date(iso + "T12:00").toLocaleDateString("cs-CZ", { weekday: "short", day: "numeric", month: "numeric" });
+
+function mealRow(meal, { added = false, extra = "" } = {}) {
+  const row = document.createElement("div");
+  row.className = "meal";
+  row.innerHTML = `
+    <div class="info">
+      <div class="kind"></div>
+      <div class="name"></div>
+      <div class="values"></div>
+    </div>
+    <button></button>`;
+  row.querySelector(".kind").textContent = `${meal.kind}${extra}`;
+  row.querySelector(".name").textContent = meal.name;
+  row.querySelector(".values").textContent =
+    `${kj(meal.kj)} kJ · ${meal.kcal} kcal · B ${meal.protein} · S ${meal.carbs} · T ${meal.fat} g`;
+  const button = row.querySelector("button");
+  button.textContent = added ? "Zapsáno ✓" : "Zapsat";
+  button.disabled = added;
+  button.addEventListener("click", () => addMeal(meal, button));
+  return row;
+}
+
+async function addMeal(meal, button) {
+  button.disabled = true;
+  button.textContent = "Zapisuji…";
+  try {
+    await api("/api/add", { key: meal.key, date: $("day").value });
+    button.textContent = "Zapsáno ✓";
+    loadMenu();
+  } catch (error) {
+    button.textContent = error.status === 409 ? "Už zapsáno" : "Zkusit znovu";
+    button.disabled = error.status === 409;
+    setStatus("menu-status", error.message, "err");
+  }
+}
+
+async function loadMenu() {
+  setStatus("menu-status", "Načítám jídelníček…");
+  try {
+    const params = new URLSearchParams({ date: $("day").value });
+    if ($("program").value) params.set("program", $("program").value);
+    const data = await api(`/api/menu?${params}`);
+    if (!$("program").options.length) {
+      for (const [id, name] of Object.entries(data.programs)) $("program").add(new Option(name, id));
+      $("program").value = data.program;
+    }
+    $("menu").replaceChildren(...data.meals.map((m) => mealRow(m, { added: m.added })));
+    $("add-day").disabled = !data.meals.length || data.meals.every((m) => m.added);
+    setStatus("menu-status", data.meals.length ? "" : "Na tento den FF Menu jídelníček nemá (víkend nebo ještě nezveřejněný týden).");
+  } catch (error) {
+    setStatus("menu-status", error.message, "err");
+  }
+}
+
+$("add-day").addEventListener("click", async () => {
+  $("add-day").disabled = true;
+  try {
+    const data = await api("/api/add-day", { date: $("day").value, program: $("program").value });
+    setStatus("menu-status", `Zapsáno ${data.added.length}, už dřív zapsaných ${data.skipped.length}.`, "ok");
+  } catch (error) {
+    setStatus("menu-status", error.message, "err");
+  }
+  loadMenu();
+});
+
+function rotated(bitmap, angle, max) {
+  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale), h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement("canvas");
+  [canvas.width, canvas.height] = angle % 180 ? [h, w] : [w, h];
+  const ctx = canvas.getContext("2d");
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((angle * Math.PI) / 180);
+  ctx.drawImage(bitmap, -w / 2, -h / 2, w, h);
+  return canvas;
+}
+
+let ocrWorker;
+async function scan(file) {
+  $("candidates").replaceChildren();
+  try {
+    setStatus("scan-status", "Připravuji čtení textu…");
+    await loadScript(TESSERACT);
+    ocrWorker ??= await Tesseract.createWorker("ces");
+    const bitmap = await createImageBitmap(file);
+    // the label is often sideways in the photo, so try upright first, then both quarter turns
+    const angles = [0, 270, 90];
+    let best = null;
+    for (const [i, angle] of angles.entries()) {
+      setStatus("scan-status", `Čtu štítek (${i + 1}/${angles.length})…`);
+      const { data } = await ocrWorker.recognize(rotated(bitmap, angle, 1600));
+      const result = await api("/api/match", { text: data.text });
+      const score = (r) => (r && r.candidates.length ? r.candidates[0].score : 0);
+      if (score(result) > score(best)) best = result;
+      if (result.confident) break;
+    }
+    const shown = best ? best.candidates.slice(0, 3) : [];
+    $("candidates").replaceChildren(...shown.map((m) =>
+      mealRow(m, { extra: ` · ${dayLabel(m.day)} · ${m.program}` })));
+    setStatus("scan-status", best && best.confident
+      ? "Našel jsem tohle jídlo:"
+      : "Štítek se nepodařilo jistě přečíst. Zkus fotku zblízka a rovně, nebo vyber ze seznamu níže.",
+      best && best.confident ? "ok" : "err");
+  } catch (error) {
+    setStatus("scan-status", error.message || "Čtení štítku selhalo", "err");
+  }
+}
+
+$("scan-input").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (file) scan(file);
+  event.target.value = "";
+});
+
+$("pair").addEventListener("toggle", async () => {
+  if (!$("pair").open || $("qr").childElementCount) return;
+  try {
+    const [{ url }] = await Promise.all([api("/api/pair"), loadScript(QRCODE)]);
+    const qr = qrcode(0, "M");
+    qr.addData(url);
+    qr.make();
+    $("qr").innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+    $("qr-url").textContent = url;
+  } catch (error) {
+    $("qr-url").textContent = error.message;
+  }
+});
+
+$("day").value = today();
+$("day").addEventListener("change", loadMenu);
+$("program").addEventListener("change", loadMenu);
+loadMenu();
+</script>
+</body>
+</html>
