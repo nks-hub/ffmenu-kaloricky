@@ -3,6 +3,7 @@ __pycache__/
 config.local.json
 data/
 node_modules/
+dist/
 
 # Editor/IDE local configs
 .[a-z]*/
