@@ -1,0 +1,95 @@
+"""Local stand-in for the www.dine4fit.com legacy API, built from what KT Android 3.14.71 sends and expects."""
+import hashlib
+import json
+import re
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit
+
+
+class FakeKT:
+    def __init__(self, email="jan@example.com", password="tajne heslo", unit="kj"):
+        self.email = email
+        self.password_md5 = hashlib.md5(password.encode()).hexdigest()
+        self.unit = unit
+        self.hashes = set()
+        self.intakes = []
+        self.logins = 0
+        self.reject_intake = None
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), self._handler())
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    @property
+    def url(self):
+        return f"http://127.0.0.1:{self.server.server_port}/"
+
+    def close(self):
+        self.server.shutdown()
+        self.server.server_close()
+
+    def _handler(self):
+        fake = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def do_GET(self):
+                self._dispatch(None)
+
+            def do_POST(self):
+                self._dispatch(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+
+            def _reply(self, xml):
+                data = xml.encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/xml; charset=utf-8")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def _result(self, code, msg=""):
+                self._reply(f"<result><code>{code}</code><msg>{msg}</msg></result>")
+
+            def _dispatch(self, body):
+                url = urlsplit(self.path)
+                q = {k: v[0] for k, v in parse_qs(url.query).items()}
+                if q.get("v") != "621" or q.get("pid") != "aNdV2wl7":
+                    return self._result(400, "neznámý klient")
+                if url.path == "/login.api.php":
+                    return self._login(q)
+                if q.get("HASH_Uzivatel") not in fake.hashes:
+                    return self._result(450, "Uživatel není přihlášen")
+                if url.path == "/getInfo.php":
+                    return self._reply(f"<uzivatel><email>{fake.email}</email>"
+                                       f"<preferUnit>{fake.unit}</preferUnit></uzivatel>")
+                if url.path == "/addPrijem.php" and body is not None:
+                    return self._intake(body)
+                self._result(404, "neznámá akce")
+
+            def _login(self, q):
+                if q.get("Email") != fake.email:
+                    return self._result(406, f"Přihlašovací email {q.get('Email')} není registrován.")
+                if q.get("Pass") != fake.password_md5:
+                    return self._result(401, "Špatné heslo")
+                fake.logins += 1
+                token = f"h{fake.logins}"
+                fake.hashes.add(token)
+                self._reply(f"<result><code>200</code><hash>{token}</hash><userID>42</userID></result>")
+
+            def _intake(self, body):
+                if fake.reject_intake:
+                    return self._result(*fake.reject_intake)
+                data = json.loads(body)
+                valid = (re.fullmatch(r"\d{4}-\d\d-\d\d", data.get("Datum", ""))
+                         and re.fullmatch(r"\d\d:\d\d", data.get("Cas", ""))
+                         and data.get("ID_Cas") in range(1, 7)
+                         and data.get("Polozky")
+                         and all(i.get("Typ") == "vlozenaHodnota" and i.get("Nazev")
+                                 and isinstance(i.get("Energie"), (int, float)) for i in data["Polozky"]))
+                if not valid:
+                    return self._result(400, "Neplatná data")
+                fake.intakes.append(data)
+                self._result(200)
+
+        return Handler
