@@ -205,8 +205,8 @@ async function scan(file) {
     await loadScript(TESSERACT);
     ocrWorker ??= await Tesseract.createWorker("ces");
     const bitmap = await createImageBitmap(file);
-    // the label is often sideways in the photo, so try upright first, then both quarter turns
-    const angles = [0, 270, 90];
+    // a box photographed upright has its label text running top to bottom (needs 270°); then try the rest
+    const angles = [270, 0, 90];
     let best = null;
     for (const [i, angle] of angles.entries()) {
       setStatus("scan-status", `Čtu štítek (${i + 1}/${angles.length})…`);
