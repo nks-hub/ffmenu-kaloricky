@@ -13,7 +13,7 @@
 - 📱 **QR code per meal** - a "Zobrazit QR pro Kalorické tabulky" button on every meal card shows a QR code that the barcode scanner of the Kalorické tabulky app opens as a food
 - 🔥 **kcal next to kJ** - the menu shows the energy in kcal as well, converted the way the Kalorické tabulky app does it
 - ⚖️ **Values from the menu** - energy, protein, carbohydrates, fat, fiber and cholesterol are read from the page, nothing is estimated
-- 🔁 **No duplicates** - before creating a food the extension runs the Kalorické tabulky duplicate check and reuses an FF Menu food with the same values, created by anyone
+- 🔁 **No duplicates per account** - before creating a food the extension runs the Kalorické tabulky duplicate check and reuses an FF Menu food with the same values that the account already created
 - 🔐 **Runs in the browser only** - the extension calls Kalorické tabulky directly and stores the MD5 hash of your password, not the password
 - 📷 **Optional label scanner** - a Python service with a phone page that reads the box label with OCR (Tesseract.js) and matches it to the menu, plus a command that logs a whole day
 
@@ -98,6 +98,7 @@ FFKT_LIVE=1 FFKT_KT_EMAIL=... FFKT_KT_PASSWORD=... python -m unittest discover -
 
 ## Limitations
 
+- The duplicate check only sees foods of the logged-in Kalorické tabulky account, so people using the extension with their own accounts each create their own copy of a dish.
 - The Kalorické tabulky API is unofficial. If it changes, writing fails and the extension shows the error returned by Kalorické tabulky.
 - Foods created by the extension are public in the Kalorické tabulky database and show sugar and salt as 0.
 - Kalorické tabulky ignores the portion unit of a new food (tried with "porce" at 100 g and 300 g) and keeps the food locked until its moderators approve it, so one FF Menu portion is entered as 100 g.

@@ -139,7 +139,7 @@ async function readJson(response) {
 }
 
 // The duplicate check of the KT app ("search/duplicates") matches foods by values, including foods still
-// waiting for approval and foods of other users. It rejects foodstuff_type_id in any format.
+// waiting for approval, but only those of the logged-in account. It rejects foodstuff_type_id in any format.
 async function findFood(hash, meal) {
   const response = await fetchRetrying(new URL("api/v1/food-suggestion/search/duplicates", KT_URL), {
     method: "POST",

@@ -9,7 +9,7 @@ English version: [README.md](README.md). Projekt nemá nic společného s FF Men
 - U každého jídla na ffmenu.cz/jidelnicek je tlačítko „Zobrazit QR pro Kalorické tabulky“. Ukáže QR kód, který čtečka v aplikaci Kalorické tabulky otevře jako potravinu.
 - K energii v kJ doplní přepočet na kcal, stejný, jaký počítá aplikace KT.
 - Energii, bílkoviny, sacharidy, tuky, vlákninu a cholesterol čte ze stránky. Nic neodhaduje.
-- Nezakládá duplicity: před založením se zeptá kontroly duplicit v Kalorických tabulkách a použije potravinu FF Menu se stejnými hodnotami, ať ji založil kdokoli.
+- V rámci jednoho účtu nezakládá duplicity: před založením se zeptá kontroly duplicit v Kalorických tabulkách a použije potravinu FF Menu se stejnými hodnotami, kterou už ten účet založil. Potraviny jiných účtů kontrola nevidí.
 - Běží jen v prohlížeči: s Kalorickými tabulkami mluví napřímo a heslo si neukládá, drží jen jeho MD5 hash.
 - Volitelně je tu služba v Pythonu se stránkou pro mobil: přečte štítek z krabičky (OCR) a najde jídlo v jídelníčku. Umí taky zapsat celý den jedním příkazem.
 
@@ -78,6 +78,7 @@ FFKT_LIVE=1 FFKT_KT_EMAIL=... FFKT_KT_PASSWORD=... python -m unittest discover -
 
 ## Omezení
 
+- Kontrola duplicit vidí jen potraviny přihlášeného účtu. Když doplněk používá víc lidí, každý se svým účtem, založí si každý vlastní kopii jídla.
 - Rozhraní Kalorických tabulek je neoficiální. Když ho změní, zápis selže a doplněk ukáže chybu, kterou KT vrátily.
 - Potraviny založené doplňkem jsou v databázi Kalorických tabulek veřejné a mají cukry a sůl 0.
 - Jednotku „porce“ Kalorické tabulky u nové potraviny ignorují (zkoušeno se 100 g i 300 g) a potravinu do schválení moderátorem zamknou, takže jedna porce FF Menu se zadává jako 100 g.
