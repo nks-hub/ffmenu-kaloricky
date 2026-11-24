@@ -17,7 +17,7 @@ English version: [README.md](README.md). Projekt nemá nic společného s FF Men
 
 ## Instalace
 
-Chrome na Windows a macOS instaluje doplňky mimo Chrome Web Store jen v režimu pro vývojáře. Než bude doplněk v obchodě, instaluje se takhle:
+Chrome na Windows a macOS instaluje doplňky mimo Chrome Web Store jen v režimu pro vývojáře. Než bude doplněk v obchodě, instaluje se takhle. Hotový zip každé verze je přiložený k jejímu [vydání na GitHubu](https://github.com/nks-hub/ffmenu-kaloricky/releases), stáhni ho tam, nebo si ho sestav sám:
 
 1. Stáhni repozitář a sestav balíček: `git clone https://github.com/nks-hub/ffmenu-kaloricky.git`, pak v jeho složce `python tools/build_extension.py`. Vznikne `dist/ffmenu-kt-<verze>.zip`.
 2. Zip rozbal do složky, kterou nebudeš mazat. Chrome z ní doplněk načítá při každém spuštění.

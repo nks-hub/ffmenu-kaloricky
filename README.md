@@ -27,7 +27,7 @@
 
 ## Installation
 
-Chrome on Windows and macOS installs extensions from outside the Chrome Web Store only in Developer mode, so until the extension is in the store:
+Chrome on Windows and macOS installs extensions from outside the Chrome Web Store only in Developer mode, so until the extension is in the store. The built zip of every version is attached to its [GitHub release](https://github.com/nks-hub/ffmenu-kaloricky/releases); download it there, or build it yourself:
 
 ```
 git clone https://github.com/nks-hub/ffmenu-kaloricky.git
